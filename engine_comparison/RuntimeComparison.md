@@ -7,12 +7,19 @@
 | V8                        | ECMA-262                                    |                            | C++, C# .NET,Python                         | Yes          | Yes                                | Yes                           | A lot                                       | Should be offered by the Closures | No                                          |                          |
 | Hermes                    | React Native framework & ECMA-402           |                            | C, C++, Python                              | Yes          | No                                 | yes                           | No JIT precompilation, but ahed compilation | Should be offered by the Closures | No                                          |                          |
 | Js-interpreter            | Limited set of recognized language features |                            | Not found integration                       | Yes          | No                                 |                               | No intelligence                             | Sandbox each running instance     | Yes, multiple instances together            |                          |
-| Rhino                     | ES6, ES2016+                                |                            | Java                             		     | Yes          | Should not be                      | Yes                           | Yes                                         | Yes                               | Yes                                         |                          |
-| (Duktape)   		        | E5, E6&E7 (partial) (Du-1)                  | 148KB ROM, 78KB RAM (Du-2) | C&C++ (Du-1), Python (Du-3), Go&Java (Du-4) | Yes (Du-1)   |                                    |                               | Almost no optimization (Du-5)               | Yes (Du-6)                        | Only one thread per heap (Du-7)             |                          |
+| (Rhino)                   | ECMA-357 (R-1)                              |                            | Java (R-2)                                  | Yes (R-3)    |                                    |                               | Yes (R-4)                                   | Yes (R-5)                         | Yes, because of the JVM?                    | Active (R-3)             |
+| (Duktape)   		        | E5, E6&E7 (partial) (Du-1)                  | 148KB ROM, 78KB RAM (Du-2) | C&C++ (Du-1), Python (Du-3), Go&Java (Du-4) | Yes (Du-1)   |                                    |                               | Almost no optimization (Du-5)               | Yes (Du-6)                        | Only one thread per heap (Du-7)             | Active (Du-1)            |
 | Iot.Js (JerryScript)      | ECMAScript 5.1 (J-1)                        | 256KB ROM, 256KB RAM (J-2) | C (J-1)                         	         | Yes (J-1)    |                                    | Snapshot (J-1)                |                                             |                                   |                                             | IoT.js not active (J-3)  |
 | Deno (V8)                 | ES6 (D-1)                                   |                            | Rust (D-2)                      	         | Yes (D-3)    | Yes (D-4)                          | Using TypeScript (D-5)        | JIT (D-6)                                   | Sandboxing (D-7)                  | Using workers (D-8)                         | Active Development (D-9) |
 
 ## Sources
+R-1 http://web.archive.org/web/20190108031118/https://developer.mozilla.org/en-US/docs/Mozilla/Projects/Rhino/Overview<br />
+R-2 http://web.archive.org/web/20160514071428/https://developer.mozilla.org/en-US/docs/Mozilla/Projects/Rhino/Embedding_tutorial<br />
+R-3 https://github.com/mozilla/rhino<br />
+R-4 http://web.archive.org/web/20160809015503/https://developer.mozilla.org/en-US/docs/Mozilla/Projects/Rhino/Optimization<br />
+R-5 https://github.com/javadelight/delight-rhino-sandbox<br />
+R-6 
+
 Du-1 https://github.com/svaarala/duktape/<br />
 Du-2 https://ieeexplore.ieee.org/document/9243749<br />
 Du-3 https://github.com/stefano/pyduktape<br />
