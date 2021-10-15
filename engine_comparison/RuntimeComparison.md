@@ -15,12 +15,12 @@
 
 ## Sources
 
-D-1 https://de.wikipedia.org/wiki/Deno_(Software)
-D-2 https://github.com/denoland/rusty_v8
-D-3 https://github.com/denoland/deno
-D-4 https://deno.land/manual@v1.15.1/webassembly/using_wasm
-D-5 https://deno.land/manual/tools/compiler
-D-6 https://stackoverflow.com/questions/59807938/the-confusion-with-jit-compilation-in-v8
-D-7 https://github.com/denoland/deno
-D-8 https://deno.land/manual/runtime/workers
-D-9 https://github.com/denoland/deno/pulse
+D-1 https://de.wikipedia.org/wiki/Deno_(Software)<br />
+D-2 https://github.com/denoland/rusty_v8<br />
+D-3 https://github.com/denoland/deno<br />
+D-4 https://deno.land/manual@v1.15.1/webassembly/using_wasm<br />
+D-5 https://deno.land/manual/tools/compiler<br />
+D-6 https://stackoverflow.com/questions/59807938/the-confusion-with-jit-compilation-in-v8<br />
+D-7 https://github.com/denoland/deno<br />
+D-8 https://deno.land/manual/runtime/workers<br />
+D-9 https://github.com/denoland/deno/pulse<br />
