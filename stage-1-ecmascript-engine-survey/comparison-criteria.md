@@ -16,6 +16,8 @@
 - intelligence within the runtime
   - how much optimization is going on under the hood?
 - support for isolation
+  - run js code in sandbox
+  - limit permissions of the executed code
   - Can we run different functions within the same runtime which do not have access to each other's data?
 - multithreading support
-  - does the engine supports parallel execution of code in different threads? 
+  - does the engine allows to split execution of code in different threads? 
