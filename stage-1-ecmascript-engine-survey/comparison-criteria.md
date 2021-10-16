@@ -3,18 +3,19 @@
 - ECMAScript compatibility
   - What versions are supported?
 - size of runtime in MB
-  - This is something we will explore somehow throughout the project, but it's good to see if there are any hints upfront on this point
 - ease of integration with a manager and supported management functionalities
   - languages bindings available
   - support for bidirectional interaction, eg callbacks from javascript world to manager's world and vice versa
-- Open Source (or not)
+- Open Source
   - project health in terms of github momentum
 - WASM support
-  - This is a nice to have; we don't specifically want it/need it now, but it will be a future need
+  - not necessary but would be a nice feature for the future
 - ability to precompile ECMAScript
+  - snapshots: reduce the loading time
+  - minification
 - intelligence within the runtime
-  - how much optimization is going on under the hood? (lots for v8)
+  - how much optimization is going on under the hood?
 - support for isolation
   - Can we run different functions within the same runtime which do not have access to each other's data?
 - multithreading support
-  - Is there support for running in multithreaded mode
+  - does the engine supports parallel execution of code in different threads? 
