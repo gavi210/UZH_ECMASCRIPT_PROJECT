@@ -5,10 +5,10 @@
 | Chakra                    | 5.1, 6.x (partial)  (C-1)                   |                            | C++, C#, Linux, OS X, CMake, Python(C-2,3)  | Yes          | Yes (C-4) 			      |                                | Simple JIT: low opt.Full JIT: high opt (C-5)|                            | Not directly, though Web Worker API. (C-4)| Community project        | 
 | JavaScriptCore            | ECMA-262 (JSC-1)                            |                            | No integration found                        | Yes (JSC-2)  | Yes                                | Yes                           | DFG and FTL compilers (JSC-3)                     | Yes (JSC-3)               | Yes(JSC-3)                                  | Active Project                        |
 | V8                        | ES6 (V-1)                                   |                            | C++, C# .NET, Python, Go (V-2,3,4,5)        | Yes          | Yes                                | Yes   (V-6)                   | A lot                                       | Yes (V-7)                 | Yes (V-8)                                   | Active Development         |
-| Hermes                    | React Native framework & ECMA-402           |                            | C, C++, Python                              | Yes          | No                                 | yes                           | No JIT precompilation, but ahed compilation | Should be offered by the Closures | No                                          |                          |
-| Js-interpreter            | Limited set of recognized language features |                            | Not found integration                       | Yes          | No                                 |                               | No intelligence                             | Sandbox each running instance     | Yes, multiple instances together            |                          |
+| Hermes                    | ES6 (H-1)                                   |                            | C, C++, Python, React Native App (H-2)      | Yes          | No                                 |                               | No JIT, but ahed compilation (H-3) | No                        |                                             |                          |
+| Js-interpreter            | Limited set of language features (JS-1)     |                            |                                             | Yes          | No                                 |                               | No intelligence (JS-1)                             | Different instances (JS-1)| Yes, multiple instances together (JS-1)     |                          |
 | (Rhino)                   | ECMA-262 & -357 (R-1)                       |                            | Java (R-2)                                  | Yes (R-3)    |                                    |                               | Yes (R-4)                                   | Yes (R-5)                         | Yes, because of the JVM?                    | Active (R-3)             |
-| (Duktape)   		        | E5, E6&E7 (partial) (Du-1)                  | 148KB ROM, 78KB RAM (Du-2) | C&C++ (Du-1), Python (Du-3), Go&Java (Du-4) | Yes (Du-1)   |                                    |                               | Almost no optimization (Du-5)               | Yes (Du-6)                        | Only one thread per heap (Du-7)             | Active (Du-1)            |
+| (Duktape)   		 | E5, E6&E7 (partial) (Du-1)                  | 148KB ROM, 78KB RAM (Du-2) | C&C++ (Du-1), Python (Du-3), Go&Java (Du-4) | Yes (Du-1)   | No (Du-8)                          |                               | Almost no optimization (Du-5)               | Yes (Du-6)                        | On separate heaps (Du-7)             | Active (Du-1)            |
 | Iot.Js (JerryScript)      | ECMAScript 5.1 (J-1)                        | 256KB ROM, 256KB RAM (J-2) | C (J-1)                         	         | Yes (J-1)    |                                    | Snapshot (J-1)                |                                             |                                   |                                             | IoT.js not active (J-3)  |
 | Deno (V8)                 | ES6 (D-1)                                   |                            | Rust (D-2)                      	         | Yes (D-3)    | Yes (D-4)                          | Using TypeScript (D-5)        | JIT (D-6)                                   | Sandboxing (D-7)                  | Using workers (D-8)                         | Active Development (D-9) |
 | (Spidermonkey)            | ECMA-262 (S-1)                              |                            | C++&Rust (S-2)								 | Yes (S-1)    | Yes (S-2)							 |                               |                                             |                                   |                                             |                          |
@@ -37,14 +37,23 @@ V-6 https://v8.dev/blog/custom-startup-snapshots
 V-7 https://github.com/fulcrumapp/v8-sandbox
 V-8 https://stackoverflow.com/questions/39657985/how-can-i-run-a-bunch-of-js-codes-simultaneously-using-v8-from-c.  -> run on different context
 
-### Hermes
 
+### Hermes
+H-1 https://hermesengine.dev/docs/language-features
+H-2 https://hermesengine.dev/docs/react-native-integration
+H-3 https://engineering.fb.com/2019/07/12/android/hermes/
+
+### Js-interpreter
+JS-1 https://neil.fraser.name/software/JS-Interpreter/docs.html
+
+### Rhino
 R-1 http://web.archive.org/web/20190108031118/https://developer.mozilla.org/en-US/docs/Mozilla/Projects/Rhino/Overview<br />
 R-2 http://web.archive.org/web/20160514071428/https://developer.mozilla.org/en-US/docs/Mozilla/Projects/Rhino/Embedding_tutorial<br />
 R-3 https://github.com/mozilla/rhino<br />
 R-4 http://web.archive.org/web/20160809015503/https://developer.mozilla.org/en-US/docs/Mozilla/Projects/Rhino/Optimization<br />
 R-5 https://github.com/javadelight/delight-rhino-sandbox<br />
 
+### Duktape
 Du-1 https://github.com/svaarala/duktape/<br />
 Du-2 https://ieeexplore.ieee.org/document/9243749<br />
 Du-3 https://github.com/stefano/pyduktape<br />
@@ -52,6 +61,10 @@ Du-4 https://github.com/rosbit/duktape-bridge<br />
 Du-5 https://wiki.duktape.org/compiler.html<br />
 Du-6 https://github.com/svaarala/duktape/blob/master/doc/sandboxing.rst<br />
 Du-7 https://github.com/svaarala/duktape/blob/master/doc/threading.rst<br />
+Du-8 https://github.com/svaarala/duktape/blob/master/doc/emscripten-status.rst
+
+
+### Remaining to be done
 
 J-1 https://github.com/jerryscript-project/jerryscript<br />
 J-2 https://ieeexplore.ieee.org/abstract/document/7724687<br />
