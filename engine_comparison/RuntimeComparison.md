@@ -2,9 +2,9 @@
 
 | Runtime/Platform (Engine) | ECMAScript compatibility                    | Size of runtime in MB      | Ease of integration                         | Open Source  | WASM support                       | Ability to precompile Scripts | Intelligence within runtime                 | Support for isolation             | Multithreading support                      | Planned support          |
 |---------------------------|---------------------------------------------|----------------------------|---------------------------------------------|--------------|------------------------------------|-------------------------------|---------------------------------------------|-----------------------------------|---------------------------------------------|--------------------------|
-| Chakra                    | 5.1 (full) 6.x (partial)                    |                            | C++, C#, Python, Linux, OS X,CMake          | Yes          | Yes, but not provided for embedder | Should not be able ?          | Simple JIT: low opt.Full JIT: high opt      | Should be offered by the Closures | No                                          | Community project        |
-| JavaScriptCore            | ECMA-262                                    |                            | No integration found                        | Should be    | Yes                                | Yes                           | DFG and FTL compilers                       | Should be offered by the Closures | No                                          |                          |
-| V8                        | ECMA-262                                    |                            | C++, C# .NET,Python                         | Yes          | Yes                                | Yes                           | A lot                                       | Should be offered by the Closures | No                                          |                          |
+| Chakra                    | 5.1, 6.x (partial)  (C-1)                   |                            | C++, C#, Linux, OS X, CMake, Python(C-2,3)  | Yes          | Yes (C-4) 			      |                                | Simple JIT: low opt.Full JIT: high opt (C-5)|                            | Not directly, though Web Worker API. (C-4)| Community project        | 
+| JavaScriptCore            | ECMA-262 (JSC-1)                            |                            | No integration found                        | Yes (JSC-2)  | Yes                                | Yes                           | DFG and FTL compilers (JSC-3)                     | Yes (JSC-3)               | Yes(JSC-3)                                  | Active Project                        |
+| V8                        | ES6 (V-1)                                   |                            | C++, C# .NET, Python, Go (V-2,3,4,5)        | Yes          | Yes                                | Yes   (V-6)                   | A lot                                       | Yes (V-7)                 | Yes (V-8)                                   | Active Development         |
 | Hermes                    | React Native framework & ECMA-402           |                            | C, C++, Python                              | Yes          | No                                 | yes                           | No JIT precompilation, but ahed compilation | Should be offered by the Closures | No                                          |                          |
 | Js-interpreter            | Limited set of recognized language features |                            | Not found integration                       | Yes          | No                                 |                               | No intelligence                             | Sandbox each running instance     | Yes, multiple instances together            |                          |
 | (Rhino)                   | ECMA-262 & -357 (R-1)                       |                            | Java (R-2)                                  | Yes (R-3)    |                                    |                               | Yes (R-4)                                   | Yes (R-5)                         | Yes, because of the JVM?                    | Active (R-3)             |
@@ -14,6 +14,31 @@
 | (Spidermonkey)            | ECMA-262 (S-1)                              |                            | C++&Rust (S-2)								 | Yes (S-1)    | Yes (S-2)							 |                               |                                             |                                   |                                             |                          |
 
 ## Sources
+
+### Chakra 
+C-1 https://en.wikipedia.org/wiki/Chakra_(JavaScript_engine)
+C-2 https://github.com/chakra-core/ChakraCore/wiki/Embedding-ChakraCore
+C-3 https://github.com/microsoft/Chakra-Samples/tree/master/ChakraCore%20Samples/Hello%20World/Python
+C-4 https://blogs.windows.com/msedgedev/2017/04/20/improved-javascript-performance-webassembly-shared-memory/
+C-5 https://github.com/chakra-core/ChakraCore/wiki/Architecture-Overview
+
+### JavaScriptCore
+JSC-1 https://trac.webkit.org/wiki/JavaScriptCore
+JSC-2 https://github.com/WebKit/webkit/tree/main/Source/JavaScriptCore
+JSC-3 https://developer.apple.com/documentation/javascriptcore/jsvirtualmachine
+
+### v8
+V-1 https://nodejs.org/en/docs/es6/
+V-2 https://v8.dev/docs/embed
+V-3 https://pypi.org/project/PyV8/
+V-4 https://github.com/rogchap/v8go
+V-5 https://github.com/denoland/rusty_v8
+V-6 https://v8.dev/blog/custom-startup-snapshots
+V-7 https://github.com/fulcrumapp/v8-sandbox
+V-8 https://stackoverflow.com/questions/39657985/how-can-i-run-a-bunch-of-js-codes-simultaneously-using-v8-from-c.  -> run on different context
+
+### Hermes
+
 R-1 http://web.archive.org/web/20190108031118/https://developer.mozilla.org/en-US/docs/Mozilla/Projects/Rhino/Overview<br />
 R-2 http://web.archive.org/web/20160514071428/https://developer.mozilla.org/en-US/docs/Mozilla/Projects/Rhino/Embedding_tutorial<br />
 R-3 https://github.com/mozilla/rhino<br />
