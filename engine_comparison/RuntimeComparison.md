@@ -35,7 +35,7 @@ V-4 https://github.com/rogchap/v8go<br />
 V-5 https://github.com/denoland/rusty_v8<br />
 V-6 https://v8.dev/blog/custom-startup-snapshots<br />
 V-7 https://github.com/fulcrumapp/v8-sandbox<br />
-V-8 https://stackoverflow.com/questions/39657985/how-can-i-run-a-bunch-of-js-codes-simultaneously-using-v8-from-c.  -> run on different context<br />
+V-8 https://stackoverflow.com/questions/39657985/how-can-i-run-a-bunch-of-js-codes-simultaneously-using-v8-from-c.<br />
 
 
 ### Hermes
