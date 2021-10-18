@@ -8,43 +8,43 @@
 | Hermes                    | ES6 (H-1)                                   |                            | C, C++, Python, React Native App (H-2)      | Yes          | No                                 |                               | No JIT, but ahed compilation (H-3) | No                        |                                             |                          |
 | Js-interpreter            | Limited set of language features (JS-1)     |                            |                                             | Yes          | No                                 |                               | No intelligence (JS-1)                             | Different instances (JS-1)| Yes, multiple instances together (JS-1)     |                          |
 | (Rhino)                   | ECMA-262 & -357 (R-1)                       |                            | Java (R-2)                                  | Yes (R-3)    |                                    |                               | Yes (R-4)                                   | Yes (R-5)                         | Yes, because of the JVM?                    | Active (R-3)             |
-| (Duktape)   		 | E5, E6&E7 (partial) (Du-1)                  | 148KB ROM, 78KB RAM (Du-2) | C&C++ (Du-1), Python (Du-3), Go&Java (Du-4) | Yes (Du-1)   | No (Du-8)                          |                               | Almost no optimization (Du-5)               | Yes (Du-6)                        | On separate heaps (Du-7)             | Active (Du-1)            |
-| Iot.Js (JerryScript)      | ECMAScript 5.1 (J-1)                        | 256KB ROM, 256KB RAM (J-2) | C (J-1)                         	         | Yes (J-1)    |                                    | Snapshot (J-1)                |                                             |                                   |                                             | IoT.js not active (J-3)  |
-| Deno (V8)                 | ES6 (D-1)                                   |                            | Rust (D-2)                      	         | Yes (D-3)    | Yes (D-4)                          | Using TypeScript (D-5)        | JIT (D-6)                                   | Sandboxing (D-7)                  | Using workers (D-8)                         | Active Development (D-9) |
-| (Spidermonkey)            | ECMA-262 (S-1)                              |                            | C++&Rust (S-2)								 | Yes (S-1)    | Yes (S-2)							 |                               |                                             |                                   |                                             |                          |
+| (Duktape)   		   | E5, E6&E7 (partial) (Du-1)                  | 148KB ROM, 78KB RAM (Du-2) | C&C++ (Du-1), Python (Du-3), Go&Java (Du-4) | Yes (Du-1)   | No (Du-8)                          |                               | Almost no optimization (Du-5)               | Yes (Du-6)                        | On separate heaps (Du-7)             | Active (Du-1)            |
+| Iot.Js (JerryScript)      | ECMAScript 5.1 (J-1)                        | 256KB ROM, 256KB RAM (J-2) | C (J-1)                         	      | Yes (J-1)    |                                    | Snapshot (J-1)                |                                             |                                   |                                             | IoT.js not active (J-3)  |
+| Deno (V8)                 | ES6 (D-1)                                   |                            | Rust (D-2)                      	      | Yes (D-3)    | Yes (D-4)                          | Using TypeScript (D-5)        | JIT (D-6)                                   | Sandboxing (D-7)                  | Using workers (D-8)                         | Active Development (D-9) |
+| (Spidermonkey)            | ECMA-262 (S-1)                              |                            | C++&Rust (S-2)			      | Yes (S-1)    | Yes (S-2)			       |                               | JIT (S-3)                                             |                                   |                                             |                          |
 
-## Sources
+## References
 
 ### Chakra 
-C-1 https://en.wikipedia.org/wiki/Chakra_(JavaScript_engine)
-C-2 https://github.com/chakra-core/ChakraCore/wiki/Embedding-ChakraCore
-C-3 https://github.com/microsoft/Chakra-Samples/tree/master/ChakraCore%20Samples/Hello%20World/Python
-C-4 https://blogs.windows.com/msedgedev/2017/04/20/improved-javascript-performance-webassembly-shared-memory/
-C-5 https://github.com/chakra-core/ChakraCore/wiki/Architecture-Overview
+C-1 https://en.wikipedia.org/wiki/Chakra_(JavaScript_engine)<br />
+C-2 https://github.com/chakra-core/ChakraCore/wiki/Embedding-ChakraCore<br />
+C-3 https://github.com/microsoft/Chakra-Samples/tree/master/ChakraCore%20Samples/Hello%20World/Python<br />
+C-4 https://blogs.windows.com/msedgedev/2017/04/20/improved-javascript-performance-webassembly-shared-memory/<br />
+C-5 https://github.com/chakra-core/ChakraCore/wiki/Architecture-Overview<br />
 
 ### JavaScriptCore
-JSC-1 https://trac.webkit.org/wiki/JavaScriptCore
-JSC-2 https://github.com/WebKit/webkit/tree/main/Source/JavaScriptCore
-JSC-3 https://developer.apple.com/documentation/javascriptcore/jsvirtualmachine
+JSC-1 https://trac.webkit.org/wiki/JavaScriptCore<br />
+JSC-2 https://github.com/WebKit/webkit/tree/main/Source/JavaScriptCore<br />
+JSC-3 https://developer.apple.com/documentation/javascriptcore/jsvirtualmachine<br />
 
 ### v8
-V-1 https://nodejs.org/en/docs/es6/
-V-2 https://v8.dev/docs/embed
-V-3 https://pypi.org/project/PyV8/
-V-4 https://github.com/rogchap/v8go
-V-5 https://github.com/denoland/rusty_v8
-V-6 https://v8.dev/blog/custom-startup-snapshots
-V-7 https://github.com/fulcrumapp/v8-sandbox
-V-8 https://stackoverflow.com/questions/39657985/how-can-i-run-a-bunch-of-js-codes-simultaneously-using-v8-from-c.  -> run on different context
+V-1 https://nodejs.org/en/docs/es6/<br />
+V-2 https://v8.dev/docs/embed<br />
+V-3 https://pypi.org/project/PyV8/<br />
+V-4 https://github.com/rogchap/v8go<br />
+V-5 https://github.com/denoland/rusty_v8<br />
+V-6 https://v8.dev/blog/custom-startup-snapshots<br />
+V-7 https://github.com/fulcrumapp/v8-sandbox<br />
+V-8 https://stackoverflow.com/questions/39657985/how-can-i-run-a-bunch-of-js-codes-simultaneously-using-v8-from-c.  -> run on different context<br />
 
 
 ### Hermes
-H-1 https://hermesengine.dev/docs/language-features
-H-2 https://hermesengine.dev/docs/react-native-integration
-H-3 https://engineering.fb.com/2019/07/12/android/hermes/
+H-1 https://hermesengine.dev/docs/language-features<br />
+H-2 https://hermesengine.dev/docs/react-native-integration<br />
+H-3 https://engineering.fb.com/2019/07/12/android/hermes/<br />
 
 ### Js-interpreter
-JS-1 https://neil.fraser.name/software/JS-Interpreter/docs.html
+JS-1 https://neil.fraser.name/software/JS-Interpreter/docs.html<br />
 
 ### Rhino
 R-1 http://web.archive.org/web/20190108031118/https://developer.mozilla.org/en-US/docs/Mozilla/Projects/Rhino/Overview<br />
@@ -61,15 +61,14 @@ Du-4 https://github.com/rosbit/duktape-bridge<br />
 Du-5 https://wiki.duktape.org/compiler.html<br />
 Du-6 https://github.com/svaarala/duktape/blob/master/doc/sandboxing.rst<br />
 Du-7 https://github.com/svaarala/duktape/blob/master/doc/threading.rst<br />
-Du-8 https://github.com/svaarala/duktape/blob/master/doc/emscripten-status.rst
+Du-8 https://github.com/svaarala/duktape/blob/master/doc/emscripten-status.rst<br />
 
-
-### Remaining to be done
-
+### JerryScript
 J-1 https://github.com/jerryscript-project/jerryscript<br />
 J-2 https://ieeexplore.ieee.org/abstract/document/7724687<br />
 J-3 https://github.com/jerryscript-project/iotjs<br />
 
+### Deno
 D-1 https://de.wikipedia.org/wiki/Deno_(Software)<br />
 D-2 https://github.com/denoland/rusty_v8<br />
 D-3 https://github.com/denoland/deno<br />
@@ -80,6 +79,8 @@ D-7 https://github.com/denoland/deno<br />
 D-8 https://deno.land/manual/runtime/workers<br />
 D-9 https://github.com/denoland/deno/pulse<br />
 
+### Spidermonkey
 S-1 https://en.wikipedia.org/wiki/SpiderMonkey<br />
 S-2 https://spidermonkey.dev/<br />
+S-3 https://en.wikipedia.org/wiki/SpiderMonkey<br />
 
