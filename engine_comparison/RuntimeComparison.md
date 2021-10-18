@@ -1,17 +1,53 @@
+# List of ECMAScript Engines (https://en.wikipedia.org/wiki/List_of_ECMAScript_engines)
+
+Here we list the ECMAScript engines, which we did not cosider as candidates and why did not consider them.
+
+- Carakan: Not used anymore. Generally hard to find information
+- JScript: Support dropped (https://en.wikipedia.org/wiki/List_of_ECMAScript_engines)
+- Tamarin: Discontinued (https://en.wikipedia.org/wiki/Tamarin_(software))
+- Nashorn: Deprecated (https://en.wikipedia.org/wiki/Nashorn_(JavaScript_engine))
+- iv: Last commit in 2015 (https://github.com/Constellation/iv)
+- CL-JavaScript: Last version is of 2012 (https://marijnhaverbeke.nl/cl-javascript/)
+- BESEN: Looks like an older project. Written in Pascal.(https://github.com/BeRo1985/besen)
+
+- Continuum: Different use and older project (https://github.com/joskid/continuum)
+- Futhark (Presto): Old project (https://en.wikipedia.org/wiki/Presto_(browser_engine)#ECMAScript_engines)
+- InScript: Barely any information found.
+- JScript: Last stable release was 2011 (https://en.wikipedia.org/wiki/JScript)
+- KJS: Seen as predecessor to JavaScriptCore(https://en.wikipedia.org/wiki/KJS_(software)), which we already consider.
+- Linear B: Barely any information found.
+- Narcissus: Different use (https://en.wikipedia.org/wiki/List_of_ECMAScript_engines).
+- QtScript: Different use (https://en.wikipedia.org/wiki/List_of_ECMAScript_engines).
+- V4 (QJSEngine): See QtScript.
+- YAJI: Barely any information found.
+- XS JavaScript Engine: Very promising but hard to get information (https://github.com/Moddable-OpenSource/moddable-xst).
+- Jsish: Not old but momentum of the project seems gone (https://github.com/pcmacdon/jsish#readme).
+- Websocket.js: Barely any information found.
+- Espruino: Seems like it is intended to work with espruino boards (https://github.com/espruino).
+- MuJS: Very promising candidate. Active and easily embeddable in C. Hard to get information (https://github.com/ccxvii/mujs).
+- GNU Guile features an ECMAScript interpreter as of version 1.9: Uncertainty about status of project (https://www.gnu.org/software/guile/manual/html_node/ECMAScript.html).
+- njs: Different use (https://en.wikipedia.org/wiki/List_of_ECMAScript_engines).
+- engine262: Different use (https://en.wikipedia.org/wiki/List_of_ECMAScript_engines).
+
 # Comparison Table
 
 | Runtime/Platform (Engine) | ECMAScript compatibility                    | Size of runtime in MB      | Ease of integration                         | Open Source  | WASM support                       | Ability to precompile Scripts | Intelligence within runtime                 | Support for isolation             | Multithreading support                      | Planned support          |
 |---------------------------|---------------------------------------------|----------------------------|---------------------------------------------|--------------|------------------------------------|-------------------------------|---------------------------------------------|-----------------------------------|---------------------------------------------|--------------------------|
-| Chakra                    | 5.1, 6.x (partial)  (C-1)                   |                            | C++, C#, Linux, OS X, CMake, Python(C-2,3)  | Yes          | Yes (C-4) 			      |                                | Simple JIT: low opt.Full JIT: high opt (C-5)|                            | Not directly, though Web Worker API. (C-4)| Community project        | 
-| JavaScriptCore            | ECMA-262 (JSC-1)                            |                            | No integration found                        | Yes (JSC-2)  | Yes                                | Yes                           | DFG and FTL compilers (JSC-3)                     | Yes (JSC-3)               | Yes(JSC-3)                                  | Active Project                        |
-| V8                        | ES6 (V-1)                                   |                            | C++, C# .NET, Python, Go (V-2,3,4,5)        | Yes          | Yes                                | Yes   (V-6)                   | A lot                                       | Yes (V-7)                 | Yes (V-8)                                   | Active Development         |
-| Hermes                    | ES6 (H-1)                                   |                            | C, C++, Python, React Native App (H-2)      | Yes          | No                                 |                               | No JIT, but ahed compilation (H-3) | No                        |                                             |                          |
-| Js-interpreter            | Limited set of language features (JS-1)     |                            |                                             | Yes          | No                                 |                               | No intelligence (JS-1)                             | Different instances (JS-1)| Yes, multiple instances together (JS-1)     |                          |
+| Chakra                    | 5.1, 6.x (partial)  (C-1)                   |                            | C++, C#, Linux, OS X, CMake, Python(C-2,3)  | Yes          | Yes (C-4) 			    	     |                               | Simple JIT: low opt.Full JIT: high opt (C-5)|                                   | Not directly, though Web Worker API. (C-4)  | Community project        | 
+| JavaScriptCore            | ECMA-262 (JSC-1)                            |                            | No integration found                        | Yes (JSC-2)  | Yes                                | Yes                           | DFG and FTL compilers (JSC-3)               | Yes (JSC-3)                       | Yes(JSC-3)                                  | Active Project           |
+| V8                        | ES6 (V-1)                                   |                            | C++, C# .NET, Python, Go (V-2,3,4,5)        | Yes          | Yes                                | Yes   (V-6)                   | A lot                                       | Yes (V-7)                         | Yes (V-8)                                   | Active Development       |
+| Hermes                    | ES6 (H-1)                                   |                            | C, C++, Python, React Native App (H-2)      | Yes          | No                                 |                               | No JIT, but ahed compilation (H-3)          | No                                |                                             |                          |
+| Js-interpreter            | Limited set of language features (JS-1)     |                            |                                             | Yes          | No                                 |                               | No intelligence (JS-1)                      | Different instances (JS-1)        | Yes, multiple instances together (JS-1)     |                          |
 | (Rhino)                   | ECMA-262 & -357 (R-1)                       |                            | Java (R-2)                                  | Yes (R-3)    |                                    |                               | Yes (R-4)                                   | Yes (R-5)                         | Yes, because of the JVM?                    | Active (R-3)             |
-| (Duktape)   		   | E5, E6&E7 (partial) (Du-1)                  | 148KB ROM, 78KB RAM (Du-2) | C&C++ (Du-1), Python (Du-3), Go&Java (Du-4) | Yes (Du-1)   | No (Du-8)                          |                               | Almost no optimization (Du-5)               | Yes (Du-6)                        | On separate heaps (Du-7)             | Active (Du-1)            |
-| Iot.Js (JerryScript)      | ECMAScript 5.1 (J-1)                        | 256KB ROM, 256KB RAM (J-2) | C (J-1)                         	      | Yes (J-1)    |                                    | Snapshot (J-1)                |                                             |                                   |                                             | IoT.js not active (J-3)  |
-| Deno (V8)                 | ES6 (D-1)                                   |                            | Rust (D-2)                      	      | Yes (D-3)    | Yes (D-4)                          | Using TypeScript (D-5)        | JIT (D-6)                                   | Sandboxing (D-7)                  | Using workers (D-8)                         | Active Development (D-9) |
-| (Spidermonkey)            | ECMA-262 (S-1)                              |                            | C++&Rust (S-2)			      | Yes (S-1)    | Yes (S-2)			       |                               | JIT (S-3)                                             |                                   |                                             |                          |
+| (Duktape)   		        | E5, E6&E7 (partial) (Du-1)                  | 148KB ROM, 78KB RAM (Du-2) | C&C++ (Du-1), Python (Du-3), Go&Java (Du-4) | Yes (Du-1)   | No (Du-8)                          |                               | Almost no optimization (Du-5)               | Yes (Du-6)                        | On separate heaps (Du-7)                    | Active (Du-1)            |
+| Iot.Js (JerryScript)      | ECMAScript 5.1 (J-1)                        | 256KB ROM, 256KB RAM (J-2) | C (J-1)                         	   	     | Yes (J-1)    |                                    | Snapshot (J-1)                |                                             |                                   |                                             | IoT.js not active (J-3)  |
+| Deno (V8)                 | ES6 (D-1)                                   |                            | Rust (D-2)                      	         | Yes (D-3)    | Yes (D-4)                          | Using TypeScript (D-5)        | JIT (D-6)                                   | Sandboxing (D-7)                  | Using workers (D-8)                         | Active Development (D-9) |
+| (Spidermonkey)            | ECMA-262 (S-1)                              |                            | C++&Rust (S-2)			      			     | Yes (S-1)    | Yes (S-2)			     		     |                               | JIT (S-3)                                   |                                   |                                             |                          |
+| mJS    		            | ECMA-262 (S-1)                              |                            | C++&Rust (S-2)			      			     | Yes (S-1)    | Yes (S-2)			     		     |                               | JIT (S-3)                                   |                                   |                                             |                          |
+| Tiny-JS                   | ECMA-262 (S-1)                              |                            | C++&Rust (S-2)			      			     | Yes (S-1)    | Yes (S-2)			     		     |                               | JIT (S-3)                                   |                                   |                                             |                          |
+| QuickJS                   | ECMA-262 (S-1)                              |                            | C++&Rust (S-2)			      			     | Yes (S-1)    | Yes (S-2)			     		     |                               | JIT (S-3)                                   |                                   |                                             |                          |
+| graaljs		            | ECMA-262 (S-1)                              |                            | C++&Rust (S-2)			      			     | Yes (S-1)    | Yes (S-2)			     		     |                               | JIT (S-3)                                   |                                   |                                             |                          |
+
 
 ## References
 
