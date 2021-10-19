@@ -9,6 +9,7 @@
 ## Meeting Overview
 
 - Discussion about what has been done
+- Based on the language bindings as a criteria to rule out engines it was decided to look at two engines using Rust bindings: Deno & QuickJs
 - Introduction to Deno code
 
 ## Actions for next week
