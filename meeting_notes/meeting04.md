@@ -4,7 +4,7 @@
 
 - Time, date: 2021-10-19, 0900
 - Location: Teams
-- Present: MH, RR, SM
+- Present: MH, SM
 
 ## Meeting Overview
 
