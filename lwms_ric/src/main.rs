@@ -18,15 +18,25 @@ use std::process;
 use std::fs;
 use std::path::Path;
 use std::time::{Duration, Instant};
-
 fn main() {
+
+  let working_dir_path_buf = env::current_dir().unwrap_or_else(|err| {
+    println!("Error reading current working directory: {}", err);
+    process::exit(1);
+  });
+
+  let working_dir = working_dir_path_buf.to_str().unwrap();
+
   // assume we have two arguments - the module to load and the script to run
   let args: Vec<String> = env::args().collect();
-  let (module_filename, main_module_filename) = par_parser::parse_args(&args).unwrap_or_else(|err| {
+
+  let mut module_names = Vec::new();
+  par_parser::parse_args(&args, &working_dir, &mut module_names).unwrap_or_else(|err| {
     println!("Problem parsing arguments: {}", err);
     process::exit(1);
   });
 
+  //println!("Module names: {:?}", module_names);
   let rt = tokio::runtime::Runtime::new().unwrap();
 
   // Initialize a runtime instance
@@ -36,7 +46,16 @@ fn main() {
     ..Default::default()
   });
 
-  module_loader::load_side_module(&rt, &mut runtime, module_filename.to_string());
+
+  for file_name in module_names.iter() {
+    let start = Instant::now();
+    module_loader::load_side_module(&rt, &mut runtime, file_name.to_string());
+    let duration = start.elapsed();
+    println!("Time elapsed in loading & executing the module is: {:?}", duration);
+
+  }
+
+  /*
   module_loader::load_main_module(&rt, &mut runtime, main_module_filename.to_string());
 
   println!("Main module test_02 loaded and executed");
@@ -44,6 +63,6 @@ fn main() {
   module_loader::load_main_module(&rt, &mut runtime, main_module_filename.to_string());
   let duration = start.elapsed();
   println!("Time elapsed in loading & executing the module is: {:?}", duration);
-
+  */
 }
 
