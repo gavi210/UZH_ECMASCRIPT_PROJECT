@@ -3,13 +3,14 @@
 ## Folder organization
 - **src/** contains the source code to run the light-weight management system
 - **support_modules/** stores all the **.js** and **.mjs** files to run the tests
+
 ### support_modules/
 The folder is divided into:
 - **test_scripts**: contains the JavaScript file to run the test
-- **side_modules**: contains the .mjs files defining the ES support Modules 
+- **side_modules**: contains the .mjs files defining the ES support Modules executed by the tests
 
-## Run the test
-To build and make the code running on the machine, run:
+## Run the tests
+Firstly the project needs to be build:
 ``
 cargo build
 ``
@@ -30,11 +31,11 @@ To run the tests, run the following command:
 
 ## Tasks Achieved
 - Project is organized into folders, with relative module imports
-- Extended functionalities of the args parser
+- Extended functionalities of the args parser (process multiple tests)
 - Run multiple test and prompt the execution time
 
 ## To be done
 - Relative import manager at build time (avoid dealing with hard coded absolute paths)
-- Define more complex functions
+- Define more complex functions, describe the tests executed and define possible outcome expectations
 - Define a better folder organization for the test files
 - Embed QuickJs runtime to have performance comparisons
