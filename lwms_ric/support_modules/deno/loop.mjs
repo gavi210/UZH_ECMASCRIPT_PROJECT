@@ -1,4 +1,4 @@
-// loop.mjs
+// loop module for deno_core
 function double(num) {
   return num * 2;
 }

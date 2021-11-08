@@ -10,8 +10,12 @@ by doing so, 1-to-1 correspondence to user modules from nats messages (or predef
 one relative paths and the other direct module name: how deal with the problem?
 
 ## deno_core
-- function to load all modules into the runtime instance
+- function to load all modules into the runtime instance -> not possible since modules are loaded through file path and
+  not through module name as in quickJs
 - reference modules loaded within code execution
+
+### Solution to deno_core modules
+Generate two different type of messages triggered by NATS -> one for Deno and one for QuickJS
 
 ## quickJs
 - function to load all modules into the runtime instance
