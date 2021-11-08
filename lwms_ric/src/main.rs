@@ -27,20 +27,6 @@ fn main() {
     process::exit(1);
   });
 
-  let code = r#"
-                Deno.core.print("Running test 01\n");
-
-                function run(n) {
-                    Deno.core.print("Hello from run function");
-                }
-
-                for (let i = 0; i < 10000; i++) {
-                    run(i);
-                }"#;
-  let code_hello = r#"Deno.core.print("Hello from str")"#;
-
-  //deno_wrapper::execute_code(code);
-
   let mut deno_exec_times = Vec::new();
   deno_wrapper::run_tests(&mut module_names, &mut deno_exec_times).unwrap_or_else(|err| {
     println!("Error running deno_tests: {}", err);
@@ -48,7 +34,6 @@ fn main() {
   });
 
   println!("Execution times for deno are: {:?}", deno_exec_times);
-
 
   let mut quick_js_exec_times = Vec::new();
   quick_js_wrapper::run_tests(&mut module_names, &mut quick_js_exec_times);
