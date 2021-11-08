@@ -122,3 +122,25 @@ fn execute_main_module(
         Err(error) => println!("Error evaluating module {}", error),
     }
 }
+
+pub fn execute_code<'a>(code: &str) -> Result<(), &'a str> {
+
+    let EMPTY_STR = "";
+
+    // INITIALIZATION
+    let rt = tokio::runtime::Runtime::new().unwrap();
+
+    let loader = Rc::new(FsModuleLoader);
+    let mut runtime = JsRuntime::new(RuntimeOptions {
+      module_loader: Some(loader),
+      ..Default::default()
+    });
+
+    let code_execution = async {
+        runtime.execute_script(EMPTY_STR,code).unwrap()
+      };
+
+    rt.block_on(code_execution); // wait until code execution is done
+
+    Ok(())
+}
