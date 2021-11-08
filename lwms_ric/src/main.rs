@@ -2,7 +2,7 @@
 //!  loads the side module.
 
 mod util;
-use util::module_loader;
+use util::deno_wrapper;
 use util::par_parser;
 
 use deno_core::JsRuntime;
@@ -10,7 +10,6 @@ use deno_core::FsModuleLoader;
 use deno_core::RuntimeOptions;
 
 use url::Url;
-use std::rc::Rc;
 use tokio::runtime::Runtime;
 use std::env;
 use std::process;
@@ -18,6 +17,7 @@ use std::process;
 use std::fs;
 use std::path::Path;
 use std::time::{Duration, Instant};
+use std::rc::Rc;
 
 fn main() {
 
@@ -37,33 +37,10 @@ fn main() {
     process::exit(1);
   });
 
-  //println!("Module names: {:?}", module_names);
-  let rt = tokio::runtime::Runtime::new().unwrap();
+  let mut deno_exec_times = Vec::new();
+  deno_wrapper::run_tests(&mut module_names, &mut deno_exec_times);
 
-  // Initialize a runtime instance
-  let loader = Rc::new(FsModuleLoader);
-  let mut runtime = JsRuntime::new(RuntimeOptions {
-    module_loader: Some(loader),
-    ..Default::default()
-  });
+  println!("Execution times for deno are: {:?}", deno_exec_times);
 
-
-  for file_name in module_names.iter() {
-    let start = Instant::now();
-    module_loader::execute_side_module(&rt, &mut runtime, file_name.to_string());
-    let duration = start.elapsed();
-    println!("Time elapsed in loading & executing the module is: {:?}", duration);
-
-  }
-
-  /*
-  module_loader::execute_main_module(&rt, &mut runtime, main_module_filename.to_string());
-
-  println!("Main module test_02 loaded and executed");
-  let start = Instant::now();
-  module_loader::execute_main_module(&rt, &mut runtime, main_module_filename.to_string());
-  let duration = start.elapsed();
-  println!("Time elapsed in loading & executing the module is: {:?}", duration);
-  */
 }
 

@@ -1,7 +1,38 @@
 use deno_core::JsRuntime;
+use deno_core::FsModuleLoader;
+use deno_core::RuntimeOptions;
+
 use tokio::runtime::Runtime;
 use url::Url;
+
 use std::process;
+use std::time::{Duration, Instant};
+use std::rc::Rc;
+
+/// invoked from main.rs
+pub fn run_tests<'a>(test_files: &'a mut Vec<String>, deno_exec_times: &'a mut Vec<Duration>) -> Result<(), &'a str> {
+    println!("Running tests with deno_core");
+
+    // INITIALIZATION
+    let rt = tokio::runtime::Runtime::new().unwrap();
+
+    let loader = Rc::new(FsModuleLoader);
+    let mut runtime = JsRuntime::new(RuntimeOptions {
+      module_loader: Some(loader),
+      ..Default::default()
+    });
+
+    // RUNNING TESTS
+    for test_file in test_files.iter() {
+        let start_time = Instant::now();
+        execute_side_module(&rt, &mut runtime, test_file.to_string());
+        let duration = start_time.elapsed();
+        deno_exec_times.push(duration);
+        //println!("Time elapsed in loading & executing the module is: {:?}", duration);
+    }
+
+    Ok(())
+}
 
 /// url to match the module file
 /// in format file:///<path-to-file>
@@ -11,7 +42,7 @@ fn get_module_url(module_filename: String) -> Url {
 }
 
 /// load a side module
-pub fn execute_side_module(
+fn execute_side_module(
     rt: &Runtime, // tokio runtime instance manager
     runtime: &mut JsRuntime, // runtime instance managed by tokio
     module_filename: String
@@ -51,7 +82,7 @@ pub fn execute_side_module(
 }
 
 // load main module
-pub fn execute_main_module(
+fn execute_main_module(
     rt: &Runtime, // tokio runtime instance manager
     runtime: &mut JsRuntime, // runtime instance managed by tokio
     main_module_filename: String
