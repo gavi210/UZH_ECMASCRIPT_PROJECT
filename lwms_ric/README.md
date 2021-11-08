@@ -45,3 +45,9 @@ To execute js in quickJs, the **.compile()** function is used.
 ### To be done - Code Structure
 - analysis of performances -> should be printed out into an output file showing comparison of results: refactor 
 deno_wrapper **run_tests** function to print elements on to file
+
+
+## Simple execution
+```
+./target/debug/jsruntime_test 1 support_modules/test_scripts/test_01.js 
+```

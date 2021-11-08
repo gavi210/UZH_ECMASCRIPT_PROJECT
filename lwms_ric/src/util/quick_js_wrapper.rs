@@ -1,9 +1,9 @@
 use rquickjs::{
     BuiltinLoader, BuiltinResolver, Context, FileResolver, Func, ModuleLoader, NativeLoader,
-    Runtime, ScriptLoader,
+    Runtime, ScriptLoader, Evaluated
 };
 
-use std::time::{Duration};
+use std::time::{Duration, Instant};
 
 fn print(msg: String) {
     println!("{}", msg);
@@ -13,7 +13,8 @@ pub fn run_tests<'a>(test_files: &'a mut Vec<String>, quick_js_exec_times: &'a m
     let resolver = (
         BuiltinResolver::default(),
         FileResolver::default()
-            .with_path("./support_modules/side_modules")
+            .with_path("./support_modules/quick_js")
+            .with_native()
     );
     let loader = (
         BuiltinLoader::default(),
@@ -29,20 +30,24 @@ pub fn run_tests<'a>(test_files: &'a mut Vec<String>, quick_js_exec_times: &'a m
     ctx.with(|ctx| {
         let global = ctx.globals();
         global.set("print", Func::new("print", print)).unwrap();
-
-        println!("import script module");
-        ctx.compile(
-            "test",
+        let start_time = Instant::now();
+        let module = ctx.compile(
+            EMPTY_STR,
             r#"
-import { n, s, f } from "script_module";
-print(`n = ${n}`);
-print(`s = "${s}"`);
-print(`f(2, 4) = ${f(2, 4)}`);
-"#,
-        )
-        .unwrap();
+              import { loop } from "loop";
 
+              print("Running test 01 from quick_js");
 
+              function run(n) {
+                  loop(n);
+              }
+
+              for (let i = 0; i < 10000; i++) {
+                  run(i);
+              }
+            "#,).unwrap();
+        let duration = start_time.elapsed();
+        quick_js_exec_times.push(duration);
     });
     Ok(())
 }

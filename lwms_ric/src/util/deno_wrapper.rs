@@ -28,7 +28,6 @@ pub fn run_tests<'a>(test_files: &'a mut Vec<String>, deno_exec_times: &'a mut V
         execute_side_module(&rt, &mut runtime, test_file.to_string());
         let duration = start_time.elapsed();
         deno_exec_times.push(duration);
-        //println!("Time elapsed in loading & executing the module is: {:?}", duration);
     }
 
     Ok(())

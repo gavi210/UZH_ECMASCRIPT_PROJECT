@@ -1,7 +1,7 @@
-const loop_module_file = './../side_modules/loop.mjs';
+const loop_module_file = './../deno/loop.mjs';
 const loop_module = await import(loop_module_file);
 
-Deno.core.print("Running test 01\n");
+Deno.core.print("Running test 01 from deno\n");
 
 function run(n) {
     loop_module.loop(n);

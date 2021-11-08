@@ -38,5 +38,6 @@ fn main() {
   let mut quick_js_exec_times = Vec::new();
   quick_js_wrapper::run_tests(&mut module_names, &mut quick_js_exec_times);
 
+  println!("Execution times for quickJs are: {:?}", quick_js_exec_times);
 }
 
