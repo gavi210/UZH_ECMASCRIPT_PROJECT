@@ -18,6 +18,7 @@ use std::process;
 use std::fs;
 use std::path::Path;
 use std::time::{Duration, Instant};
+
 fn main() {
 
   let working_dir_path_buf = env::current_dir().unwrap_or_else(|err| {
@@ -49,18 +50,18 @@ fn main() {
 
   for file_name in module_names.iter() {
     let start = Instant::now();
-    module_loader::load_side_module(&rt, &mut runtime, file_name.to_string());
+    module_loader::execute_side_module(&rt, &mut runtime, file_name.to_string());
     let duration = start.elapsed();
     println!("Time elapsed in loading & executing the module is: {:?}", duration);
 
   }
 
   /*
-  module_loader::load_main_module(&rt, &mut runtime, main_module_filename.to_string());
+  module_loader::execute_main_module(&rt, &mut runtime, main_module_filename.to_string());
 
   println!("Main module test_02 loaded and executed");
   let start = Instant::now();
-  module_loader::load_main_module(&rt, &mut runtime, main_module_filename.to_string());
+  module_loader::execute_main_module(&rt, &mut runtime, main_module_filename.to_string());
   let duration = start.elapsed();
   println!("Time elapsed in loading & executing the module is: {:?}", duration);
   */

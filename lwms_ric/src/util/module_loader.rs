@@ -3,13 +3,15 @@ use tokio::runtime::Runtime;
 use url::Url;
 use std::process;
 
+/// url to match the module file
+/// in format file:///<path-to-file>
 fn get_module_url(module_filename: String) -> Url {
     let module_filename_as_url = "file://".to_string() + &module_filename;
     return Url::parse(&module_filename_as_url).unwrap();
 }
 
-// load a side module
-pub fn load_side_module(
+/// load a side module
+pub fn execute_side_module(
     rt: &Runtime, // tokio runtime instance manager
     runtime: &mut JsRuntime, // runtime instance managed by tokio
     module_filename: String
@@ -49,7 +51,7 @@ pub fn load_side_module(
 }
 
 // load main module
-pub fn load_main_module(
+pub fn execute_main_module(
     rt: &Runtime, // tokio runtime instance manager
     runtime: &mut JsRuntime, // runtime instance managed by tokio
     main_module_filename: String
