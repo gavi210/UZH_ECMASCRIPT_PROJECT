@@ -31,3 +31,8 @@ To run the tests, run the following command:
 - Define more complex functions, describe the tests executed and define possible outcome expectations
 - Define a better folder organization for the test files
 - Embed QuickJs runtime to have performance comparisons
+
+
+### To be done - Code Structure
+- analysis of performances -> should be printed out into an output file showing comparison of results: refactor 
+deno_wrapper **run_tests** function to print elements on to file
