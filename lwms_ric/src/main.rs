@@ -3,21 +3,11 @@
 
 mod util;
 use util::deno_wrapper;
+use util::quick_js_wrapper;
 use util::par_parser;
 
-use deno_core::JsRuntime;
-use deno_core::FsModuleLoader;
-use deno_core::RuntimeOptions;
-
-use url::Url;
-use tokio::runtime::Runtime;
 use std::env;
 use std::process;
-
-use std::fs;
-use std::path::Path;
-use std::time::{Duration, Instant};
-use std::rc::Rc;
 
 fn main() {
 
@@ -33,14 +23,22 @@ fn main() {
 
   let mut module_names = Vec::new();
   par_parser::parse_args(&args, &working_dir, &mut module_names).unwrap_or_else(|err| {
-    println!("Problem parsing arguments: {}", err);
+    println!("Error parsing arguments: {}", err);
     process::exit(1);
   });
 
+  /*
   let mut deno_exec_times = Vec::new();
-  deno_wrapper::run_tests(&mut module_names, &mut deno_exec_times);
+  deno_wrapper::run_tests(&mut module_names, &mut deno_exec_times).unwrap_or_else(|err| {
+    println!("Error running deno_tests: {}", err);
+    process::exit(1);
+  });
 
   println!("Execution times for deno are: {:?}", deno_exec_times);
+  */
+
+  let mut quick_js_exec_times = Vec::new();
+  quick_js_wrapper::run_tests(&mut module_names, &mut quick_js_exec_times);
 
 }
 
