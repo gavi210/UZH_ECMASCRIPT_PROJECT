@@ -32,28 +32,22 @@ pub fn run_tests<'a>(test_files: &'a mut Vec<String>, quick_js_exec_times: &'a m
         global.set("print", Func::new("print", print)).unwrap();
         let start_time = Instant::now();
         let module = ctx.compile(
-            "loaded",
+            "",
             r#"
-              //import { loop } from "loop";
-              function double(num) {
-                return num * 2;
+              import { loop } from "loop"
+
+              print("Running test 01 from quickJs");
+
+              function run(n) {
+                  loop(n);
               }
 
-              export { double };
+              for (let i = 0; i < 10000; i++) {
+                  run(i);
+              };
             "#,).unwrap();
         let duration = start_time.elapsed();
         quick_js_exec_times.push(duration);
-
-        let module = ctx.compile(
-              "test",
-              r#"
-                //import { loop } from "loop";
-                function double(num) {
-                  return num * 2;
-                }
-
-                export { double };
-              "#,).unwrap();
     });
     Ok(())
 }
