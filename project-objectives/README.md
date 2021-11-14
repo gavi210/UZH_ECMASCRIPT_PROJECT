@@ -14,7 +14,7 @@ means to trigger basic functions in both of these runtimes using a Rust wrapper
 in both cases, it became very evident that there were multiple orders of
 magnitude performance differences between these different runtimes, with the
 more powerful v8-based solution delivering much higher performance. This,
-combined with published results for quickjs performance (link) meant that it
+combined with published results for quickjs performance [link](https://bellard.org/quickjs/bench.html) meant that it
 was unlikely that a mix of these runtimes would make sense in a server side
 context.
 
