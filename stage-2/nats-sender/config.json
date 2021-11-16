@@ -1,4 +1,0 @@
-{
-  "nats_server": "localhost:4222",
-  "subjects": ["subject-function-1"]
-}
