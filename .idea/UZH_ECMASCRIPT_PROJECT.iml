@@ -2,8 +2,8 @@
 <module type="CPP_MODULE" version="4">
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
-      <sourceFolder url="file://$MODULE_DIR$/stage_01/lwms_deno/src" isTestSource="false" />
-      <excludeFolder url="file://$MODULE_DIR$/stage_01/lwms_deno/target" />
+      <sourceFolder url="file://$MODULE_DIR$/stage-1/lwms_deno/src" isTestSource="false" />
+      <excludeFolder url="file://$MODULE_DIR$/stage-1/lwms_deno/target" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
