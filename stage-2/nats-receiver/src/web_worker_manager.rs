@@ -10,8 +10,9 @@ use deno_runtime::worker::WorkerOptions;
 use deno_runtime::BootstrapOptions;
 use deno_runtime::web_worker::WorkerId;
 use deno_runtime::web_worker::WebWorkerOptions;
-use deno_runtime::web_worker::WebWorkerType;
-use log::{info, trace, warn};
+use deno_runtime::ops::worker_host::CreateWebWorkerArgs;
+use log::info;
+
 use rants;
 use std::path::Path;
 use std::rc::Rc;
@@ -30,8 +31,14 @@ pub async fn execute_function(
 
     let module_loader = Rc::new(FsModuleLoader); // maybe define the path
 
-    let create_web_worker_cb = Arc::new(|_| { // function is invoked when instantiating a new worker
-        println!("Instantiating WebWorker");
+    let create_web_worker_cb = Arc::new(|args : CreateWebWorkerArgs| { // function is invoked when instantiating a new worker
+        let string = format!("{}{}", "./functions", args.main_module.path());
+        let js_path = Path::new(&string); // path to file -> same as one provided as input parameter
+
+        let module_specifier = match deno_core::resolve_path(&js_path.to_string_lossy()) {
+          Ok(module_specifier) => module_specifier,
+          Err(e) => panic!("Cannot load function definition, {:?}", e),
+        };
 
         let web_workers_no_child = Arc::new(|_| {
             todo!("Web workers are not supported in the example");
@@ -42,9 +49,9 @@ pub async fn execute_function(
                 apply_source_maps: true,
                 args: vec![],
                 cpu_count: 1,
-                debug_flag: true,
+                debug_flag: false,
                 enable_testing_features: true,
-                location: None,
+                location: Some(module_specifier.clone()),
                 no_color: false,
                 runtime_version: "x".to_string(),
                 ts_version: "x".to_string(),
@@ -59,7 +66,7 @@ pub async fn execute_function(
             module_loader: Rc::new(FsModuleLoader), // new default module loader
             create_web_worker_cb: web_workers_no_child, // web worker doesn't have the possibility to instantiate sub workers
             js_error_create_fn: None,
-            worker_type: WebWorkerType::Module, // so far only type::Module is supported
+            worker_type: args.worker_type, // so far only type::Module is supported
             maybe_inspector_server: None,
             get_error_class_fn: Some(&get_error_class_name),
             blob_store: BlobStore::default(),
@@ -69,20 +76,11 @@ pub async fn execute_function(
         };
 
         let permissions = Permissions::allow_all();
-        let WORKER_NAME: String = "Web_Worker".to_string();
+        let worker_name: String = "Web_Worker".to_string();
 
-        let js_path = Path::new("./functions/function-1.js"); // path to file -> same as one provided as input parameter
-
-        let module_specifier = match deno_core::resolve_path(&js_path.to_string_lossy()) {
-          Ok(module_specifier) => module_specifier,
-          Err(e) => panic!("Cannot load function definition, {:?}", e),
-        };
-
-        println!("module_specifier: {:?}", module_specifier);
-
-        let workerId = WorkerId::default();
-        return WebWorker::bootstrap_from_options(WORKER_NAME, permissions,
-              module_specifier.clone(), workerId, web_worker_options)
+        let worker_id = WorkerId::default().next().unwrap();
+        return WebWorker::bootstrap_from_options(worker_name, permissions,
+              module_specifier.clone(), worker_id, web_worker_options);
     });
 
     let location_as_url_string = "https://example.com".to_string();
@@ -100,7 +98,7 @@ pub async fn execute_function(
             apply_source_maps: false,
             args: vec![message_contents.to_string()], // accessible Deno.args
             cpu_count: 1,
-            debug_flag: true,
+            debug_flag: false,
             enable_testing_features: true,
             location: Some(parsed_location),
             no_color: false,
@@ -141,5 +139,126 @@ pub async fn execute_function(
     info!("Finish executing function: {:?}", f.name);
     Ok(())
 }
+
+
+/* USED FOR TESTING
+pub async fn get_main_worker(
+    main_module_filename: String,
+) -> Result<MainWorker, AnyError> {
+
+    let module_loader = Rc::new(FsModuleLoader); // maybe define the path
+
+    // function is invoked when instantiating a new worker
+    let create_web_worker_cb = Arc::new(|args : CreateWebWorkerArgs| {
+
+        let string = format!("{}{}", "./functions", args.main_module.path());
+        let js_path = Path::new(&string); // path to file -> same as one provided as input parameter
+
+        let module_specifier = match deno_core::resolve_path(&js_path.to_string_lossy()) {
+          Ok(module_specifier) => module_specifier,
+          Err(e) => panic!("Cannot load function definition, {:?}", e),
+        };
+
+        let web_workers_no_child = Arc::new(|_| {
+            todo!("Web workers are not supported in the example");
+        });
+
+        let web_worker_options = WebWorkerOptions {
+            bootstrap: BootstrapOptions {
+                apply_source_maps: true,
+                args: vec![],
+                cpu_count: 1,
+                debug_flag: true,
+                enable_testing_features: false,
+                location: Some(module_specifier.clone()),
+                no_color: false,
+                runtime_version: "x".to_string(),
+                ts_version: "x".to_string(),
+                unstable: true,
+            },
+            extensions: vec![],
+            unsafely_ignore_certificate_errors: None,
+            root_cert_store: None,
+            user_agent: "web_worker".to_string(),
+            use_deno_namespace: true,
+            seed: None,
+            module_loader: Rc::new(FsModuleLoader), // new default module loader
+            create_web_worker_cb: web_workers_no_child, // web worker doesn't have the possibility to instantiate sub workers
+            js_error_create_fn: None,
+            worker_type: args.worker_type, // so far only type::Module is supported
+            maybe_inspector_server: None,
+            get_error_class_fn: Some(&get_error_class_name),
+            blob_store: BlobStore::default(),
+            broadcast_channel: InMemoryBroadcastChannel::default(),
+            shared_array_buffer_store: None,
+            compiled_wasm_module_store: None,
+        };
+
+        let permissions = Permissions::allow_all();
+        let WORKER_NAME: String = "Web_Worker".to_string();
+
+        let workerId = WorkerId::default().next().unwrap();
+        return WebWorker::bootstrap_from_options(WORKER_NAME, permissions,
+              module_specifier.clone(), workerId, web_worker_options);
+    });
+
+    let location_as_url_string = "https://example.com".to_string();
+    let parsed_location = Url::parse(&location_as_url_string).unwrap();
+
+    // instantiate MainWorker with callback for WebWorkers
+    let options = WorkerOptions {
+        bootstrap: BootstrapOptions {
+            apply_source_maps: false,
+            args: vec![], // accessible Deno.args
+            cpu_count: 1,
+            debug_flag: true,
+            enable_testing_features: false,
+            location: Some(parsed_location),
+            no_color: false,
+            runtime_version: "x".to_string(),
+            ts_version: "x".to_string(),
+            unstable: true,
+        },
+        extensions: vec![], // extensions for the moment not implemented
+        unsafely_ignore_certificate_errors: None,
+        root_cert_store: None,
+        user_agent: "hello_runtime".to_string(),
+        seed: None,
+        js_error_create_fn: None,
+        create_web_worker_cb,
+        maybe_inspector_server: None,
+        should_break_on_first_statement: false,
+        module_loader,
+        get_error_class_fn: Some(&get_error_class_name),
+        origin_storage_dir: None,
+        blob_store: BlobStore::default(),
+        broadcast_channel: InMemoryBroadcastChannel::default(),
+        shared_array_buffer_store: None,
+        compiled_wasm_module_store: None,
+    };
+
+    let js_path = Path::new(&main_module_filename);
+    let module_specifier = match deno_core::resolve_path(&js_path.to_string_lossy()) {
+      Ok(module_specifier) => module_specifier,
+      Err(e) => panic!("Cannot load function definition, {:?}", e),
+    };
+
+    let permissions = Permissions::allow_all();
+
+    Ok(MainWorker::bootstrap_from_options(module_specifier.clone(), permissions, options))
+}
+
+pub fn get_module_specifier(main_module_filename: String)
+-> Result<Url, AnyError> {
+    let js_path = Path::new(&main_module_filename);
+    let module_specifier = match deno_core::resolve_path(&js_path.to_string_lossy()) {
+        Ok(module_specifier) => module_specifier,
+        Err(e) => panic!("Cannot load function definition, {:?}", e),
+    };
+
+    Ok(module_specifier)
+}
+*/
+
 
 

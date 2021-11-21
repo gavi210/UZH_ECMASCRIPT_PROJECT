@@ -2,16 +2,6 @@
   "nats_server": "localhost:4222",
   "functions": [
     {
-      "name": "function-1",
-      "nats_subject_trigger": "subject-function-1",
-      "nats_subject_trigger_type": "test-function-trigger-type",
-      "runtime_type": "runtime-type",
-      "function_definition": "./functions/function-1.js",
-      "output_destinations": "output.dest",
-      "permit_network_access": true,
-      "permitted_hosts": []
-    },
-    {
       "name": "function-web-worker-creator",
       "nats_subject_trigger": "subject-web-worker-creator",
       "nats_subject_trigger_type": "test-function-trigger-type",

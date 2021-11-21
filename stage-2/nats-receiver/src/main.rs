@@ -1,89 +1,22 @@
-use clap::{App, Arg};
-use futures::stream::StreamExt;
 use deno_core::error::AnyError;
-use log::{info, trace, warn};
 use rants::{Client, Subject};
-use serde::{Deserialize, Serialize};
 use tokio::task;
+use log::info;
 
-use std::io::Write;
-use chrono::Local;
-use env_logger::Builder;
-use log::LevelFilter;
+use std::time::{Instant};
 
-use std::time::{Duration, Instant};
-
-mod config;
 mod functions;
 mod worker;
 mod web_worker_manager;
-
-#[derive(Serialize, Deserialize, Debug)]
-struct Arguments {
-    config_file: String,
-}
-
-fn parse_args() -> Result<Arguments, clap::Error> {
-    let CONFIG_FILE = "./config.json";
-    let matches = App::new("Execute functions with WebWorkers")
-        .version("1.0")
-        .author("Maximilian & Riccardo")
-        .about("Execute functions in WebWorkers")
-        .arg(
-            Arg::new("config-file")
-                .short('c')
-                .long("config-file")
-                .about("Configuration file to be used")
-                .required(false)
-                .default_value(CONFIG_FILE),
-        )
-        .get_matches();
-
-    let config_file = match matches.value_of_t("config-file") {
-        Ok(configuration) => configuration,
-        Err(err) => return Err(err),
-    };
-
-    let c = Arguments {
-        config_file: config_file,
-    };
-
-    Ok(c)
-}
-
-fn configure_logger() {
-    Builder::new()
-        .format(|buf, record| {
-            writeln!(buf,
-                "{} [{}] - {}",
-                Local::now().format("%Y-%m-%dT%H:%M:%S"),
-                record.level(),
-                record.args()
-            )
-        })
-        .filter(None, LevelFilter::Info)
-        .init();
-}
-
+mod util;
 
 #[tokio::main]
 async fn main() -> std::io::Result<()> {
-    configure_logger();
+    util::logger::configure_logger();
 
-    let a = match parse_args() {
-        Ok(configuration) => configuration,
-        Err(err) => panic!("Unable to parse arguments: {:?}", err),
-    };
+    let configuration = util::config_parser::get_configuration_object();
 
-    let configuration = match config::read_config_file(a.config_file) {
-        Ok(configuration) => configuration, // loads config object from file
-        Err(err) => panic!("Unable to load and parse configuration: {:?}", err),
-    };
-
-    // NATS client
-    let address = configuration.nats_server.parse().unwrap();
-    let client = Client::new(vec![address]); // nats client listening to the given port
-    client.connect().await;
+    let client = get_nats_client(&configuration.nats_server).await.unwrap();
 
     // define a handle for each function to be triggered
     let mut handles = vec![];
@@ -97,8 +30,6 @@ async fn main() -> std::io::Result<()> {
 
 
         handles.push(task::spawn(async move {
-            info!("Executing subject: {}...", f.nats_subject_trigger);
-
             loop {
                 let message = sub.recv().await.unwrap();
                 let payload = message.payload();
@@ -109,27 +40,17 @@ async fn main() -> std::io::Result<()> {
                     break;
                   },
                   _ => {
-                    info!("Executing function for {:?}", f.nats_subject_trigger);
                     let function = f.clone();
                     tokio::task::spawn_blocking(|| { // spawn on a thread that could be blocked during execution
 
                       let start_time = Instant::now();
-                      let worker_output = match web_worker_manager::execute_function(function, message)  {
+                      let _worker_output =match web_worker_manager::execute_function(function, message)  {
                       //let worker_output = match worker::execute_function_web_worker(function, message)  {
-                        Ok(worker_output) => (),
+                        Ok(_worker_output) => (),
                         Err(err) => panic!("Function execution terminated in error: {:?}", err),
                       };
                       let duration = start_time.elapsed();
                       println!("Execution with MainWorkers: {:?}", duration);
-                      /*
-                      let start_time = Instant::now();
-                      let worker_output = match worker::execute_function_web_worker(function, message)  {
-                        Ok(worker_output) => (),
-                        Err(err) => panic!("Function execution terminated in error: {:?}", err),
-                      };
-                      let duration = start_time.elapsed();
-                      println!("Execution with WebWorkers: {:?}", duration);
-                      */
                     })
                     .await
                     .expect("Task panicked")
@@ -140,10 +61,17 @@ async fn main() -> std::io::Result<()> {
     }
 
     futures::future::join_all(handles).await;
-
-    // stop receiving messages
     client.disconnect().await;
 
     Ok(())
 
+}
+
+// instantiate and connect NATS client
+async fn get_nats_client(nats_server : &String) -> Result<Client, AnyError> {
+  let address = nats_server.parse().unwrap();
+  let client = Client::new(vec![address]);
+  client.connect().await;
+
+  Ok(client)
 }
