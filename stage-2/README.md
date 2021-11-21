@@ -34,8 +34,10 @@ Furthermore, the MainWorker capabilities has be extended so to instantiate WebWo
 The communications between Management System and MainWorker could be summarized as follows.
 ![plot](report_images/ManagementSystem-MainWorkerCommunication.png)
 
-To assets performance implications, WebWorkers has to be instantiated from a MainWorker. 
-Currently, creation of web workers within MainWorkers has to be implemented. 
+
+#### Measure Execution Time
+To assets performance implications of using WebWorkers instead of MainWorkers, the main worker has to instantiated WebWorker instances.
+Creation of web workers within MainWorkers has to be implemented, and it is not available yet. 
 
 The following code snippet implements the function invoked from the MainWorker to instantiate a new WebWorker
 ```
@@ -93,5 +95,5 @@ let create_web_worker_cb = Arc::new(|_| { // function is invoked when instantiat
 
 Currently, the MainWorker fails to instantiate the WebWorker, cause **invalid URL** error is thrown.
 
-###
+
 

@@ -105,7 +105,7 @@ async fn main() -> std::io::Result<()> {
 
                 match payload {
                   b"STOP" => { // terminate the subject
-                    info!("{:?} has been stopped!", f.nats_subject_trigger);
+                    info!("{:?} stopped!", f.nats_subject_trigger);
                     break;
                   },
                   _ => {
