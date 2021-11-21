@@ -10,7 +10,7 @@
 
 ### Discussion about change of objectives
 - Is it a lot? Yes! -> Work list from top to bottom and see how far we get.
-- About security: Not indepth Analysis but look at non obvious things like the possibility to write to console.log from two webworkers or the ability to share variables.
+- About security: Not indepth analysis but look at non obvious things like the possibility to write to console.log from two webworkers or the ability to share variables.
 - Suggestion to join the public Deno discord server
 
 ### Discussion about work done

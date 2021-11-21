@@ -165,8 +165,51 @@ pub async fn execute_function_web_worker(
 
     let workerId = WorkerId::default();
 
-    let (mut worker, mut handler) = WebWorker::bootstrap_from_options(WORKER_NAME, permissions,
-      module_specifier.clone(), workerId, options);
+    /*
+    let web_worker_options = WebWorkerOptions {
+        bootstrap: BootstrapOptions {
+            apply_source_maps: true,
+            args: vec![],
+            cpu_count: 1,
+            debug_flag: true,
+            enable_testing_features: true,
+            location: None,
+            no_color: false,
+            runtime_version: "x".to_string(),
+            ts_version: "x".to_string(),
+            unstable: true,
+        },
+        extensions: vec![],
+        unsafely_ignore_certificate_errors: None,
+        root_cert_store: None,
+        user_agent: "web_worker".to_string(),
+        use_deno_namespace: true,
+        seed: None,
+        module_loader: Rc::new(FsModuleLoader), // new default module loader
+        create_web_worker_cb, // web worker doesn't have the possibility to instantiate sub workers
+        js_error_create_fn: None,
+        worker_type: WebWorkerType::Module, // so far only type::Module is supported
+        maybe_inspector_server: None,
+        get_error_class_fn: Some(&get_error_class_name),
+        blob_store: BlobStore::default(),
+        broadcast_channel: InMemoryBroadcastChannel::default(),
+        shared_array_buffer_store: None,
+        compiled_wasm_module_store: None,
+    };
+
+    */
+
+    let permissions = Permissions::allow_all();
+    let WORKER_NAME: String = "Web_Worker".to_string();
+
+    let module_specifier = match deno_core::resolve_path(&js_path.to_string_lossy()) {
+      Ok(module_specifier) => module_specifier,
+      Err(e) => panic!("Cannot load function definition, {:?}", e),
+    };
+
+    let workerId = WorkerId::default();
+    let (mut worker, mut handler) =  WebWorker::bootstrap_from_options(WORKER_NAME, permissions,
+          module_specifier.clone(), workerId, options);
 
     worker.execute_main_module(&module_specifier).await?;
 

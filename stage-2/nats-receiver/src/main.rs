@@ -16,6 +16,7 @@ use std::time::{Duration, Instant};
 mod config;
 mod functions;
 mod worker;
+mod web_worker_manager;
 
 #[derive(Serialize, Deserialize, Debug)]
 struct Arguments {
@@ -100,7 +101,7 @@ async fn main() -> std::io::Result<()> {
 
 
         handles.push(task::spawn(async move {
-            // info!("Executing subject: {}...", f.nats_subject_trigger);
+            info!("Executing subject: {}...", f.nats_subject_trigger);
 
             loop {
                 let message = sub.recv().await.unwrap();
@@ -117,7 +118,8 @@ async fn main() -> std::io::Result<()> {
                     tokio::task::spawn_blocking(|| { // spawn on a thread that could be blocked during execution
 
                       let start_time = Instant::now();
-                      let worker_output = match worker::execute_function(function, message)  {
+                      let worker_output = match web_worker_manager::execute_function(function, message)  {
+                      //let worker_output = match worker::execute_function_web_worker(function, message)  {
                         Ok(worker_output) => (),
                         Err(err) => panic!("Function execution terminated in error: {:?}", err),
                       };

@@ -1,4 +1,4 @@
-const module_name = './double.mjs';
+const module_name = '/Users/riccardo_rigoni/University/erasmus_svizzera/courses_material/SoftwareMaintenanceAndEvolution/project/UZH_ECMASCRIPT_PROJECT/stage-2/nats-receiver/functions/double.mjs';
 const module = await import(module_name);
 
 async function run() {
@@ -11,5 +11,4 @@ async function run() {
 }
 
 //let obj = JSON.parse(Deno.args[1]);
-//console.log("About to run function-1 with input arguments: ", Deno.args);
 run();
