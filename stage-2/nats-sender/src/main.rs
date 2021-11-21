@@ -92,7 +92,7 @@ async fn main() -> std::io::Result<()> {
     }
 
 
-    for i in 1..10 {
+    for i in 1..2 {
       println!("Sending messages");
       // send hello message to each subject
           for subject in subjects.iter() {

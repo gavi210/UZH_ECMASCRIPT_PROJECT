@@ -15,7 +15,7 @@ passing technique. No global objects could be created to impact other WebWorkers
 ```deno_runtime::permissions::Permissions;``` allows to specify which permissions each WebWorker has. 
 The list of all permissions are: ```read, write, net, env, run, ffi, hrtime```.
 
-## Performance Implications
+## Performance Comparison (MainWorker vs WebWorker)
 ### Testing Environment
 To compare performances, testing environment has to be set.
 The environment is composed by: 
@@ -24,7 +24,7 @@ The environment is composed by:
 - architecture to execute [function-1.js](nats-receiver/functions/function-1.js) in WebWorkers.
 
 #### Testing Architecture
-Different architectures have been proposed to trigger function execution from NATS into WebWorkers.  
+A simple architecture has been proposed to trigger function execution from NATS into WebWorkers.  
 The main idea is to instantiate a MainWorker parsing the received NATS messages, and for each message, execute the corresponding function 
 in a different WebWorker. 
 To allow such triggering, a communication technique between the Rust Management System and the MainWorker has to be developed. 
@@ -33,67 +33,24 @@ Furthermore, the MainWorker capabilities has be extended so to instantiate WebWo
 #### Management System <-> MainWorker Communication
 The communications between Management System and MainWorker could be summarized as follows.
 ![plot](report_images/ManagementSystem-MainWorkerCommunication.png)
+[Local Ispector](https://docs.rs/deno_core/0.108.0/deno_core/struct.LocalInspectorSession.html) could be used to exchange messages.
 
+#### WebWorker Execution
+The [execute_function()](nats-receiver/src/web_worker_manager.rs) provides an example on how to instantiate WebWorkers.
+The [create_web_worker_cb](https://docs.rs/deno_runtime/0.34.0/deno_runtime/ops/worker_host/type.CreateWebWorkerCb.html) dynamic function
+has been implemented, and it is invoked every time the main worker instantiates a new worker. 
 
-#### Measure Execution Time
-To assets performance implications of using WebWorkers instead of MainWorkers, the main worker has to instantiated WebWorker instances.
-Creation of web workers within MainWorkers has to be implemented, and it is not available yet. 
+Nevertheless, after an in-depth analysis of the [deno_runtime](https://docs.rs/deno_runtime/0.34.0/deno_runtime/index.html) crate and a 
+talk with the deno community, emerged that dynamic WebWorkers instantiation is not supported yet. Therefore, performance comparison 
+cannot be conducted for the moment. 
+Follows a description of the concerns related to WebWorkers instantiation.
 
-The following code snippet implements the function invoked from the MainWorker to instantiate a new WebWorker
+#### WebWorkers instantiation concerns
+WebWorkers are instantiated via the MainWorker with the following js code snippet.
+```javascript
+var worker = new Worker('<module>.js');
 ```
-let create_web_worker_cb = Arc::new(|_| { // function is invoked when instantiating a new worker
-        let web_workers_no_child = Arc::new(|_| {
-            todo!("Web workers are not supported in the example");
-        });
-
-        let web_worker_options = WebWorkerOptions {
-            bootstrap: BootstrapOptions {
-                apply_source_maps: true,
-                args: vec![],
-                cpu_count: 1,
-                debug_flag: true,
-                enable_testing_features: true,
-                location: None,
-                no_color: false,
-                runtime_version: "x".to_string(),
-                ts_version: "x".to_string(),
-                unstable: true,
-            },
-            extensions: vec![],
-            unsafely_ignore_certificate_errors: None,
-            root_cert_store: None,
-            user_agent: "web_worker".to_string(),
-            use_deno_namespace: true,
-            seed: None,
-            module_loader: Rc::new(FsModuleLoader), // new default module loader
-            create_web_worker_cb: web_workers_no_child, // web worker doesn't have the possibility to instantiate sub workers
-            js_error_create_fn: None,
-            worker_type: WebWorkerType::Module, // so far only type::Module is supported
-            maybe_inspector_server: None,
-            get_error_class_fn: Some(&get_error_class_name),
-            blob_store: BlobStore::default(),
-            broadcast_channel: InMemoryBroadcastChannel::default(),
-            shared_array_buffer_store: None,
-            compiled_wasm_module_store: None,
-        };
-
-        let permissions = Permissions::allow_all();
-        let WORKER_NAME: String = "Web_Worker".to_string();
-
-        let js_path = Path::new(<path_to_file>); 
-
-        let module_specifier = match deno_core::resolve_path(&js_path.to_string_lossy()) {
-          Ok(module_specifier) => module_specifier,
-          Err(e) => panic!("Cannot load function definition, {:?}", e),
-        };
-
-        let workerId = WorkerId::default(); // maybe cause problems, duplicate worker ids
-        return WebWorker::bootstrap_from_options(WORKER_NAME, permissions,
-              module_specifier.clone(), workerId, web_worker_options)
-    });
-```
-
-Currently, the MainWorker fails to instantiate the WebWorker, cause **invalid URL** error is thrown.
-
-
+To evaluate the statement, the MainWorker has to instantiate a new WebWorker instance by referencing the ``<module>.js`` module.
+To do this, a ``ModuleSpecifier`` in the format ``file:///<path_to_module/<module>.js`` has to be provided. But import using such reference
+is currently not supported by the WebWorkers. Therefore, the MainWorker fails to create the WebWorker, since its main module cannot be loaded.
 
