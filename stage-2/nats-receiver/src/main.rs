@@ -25,10 +25,10 @@ struct Arguments {
 
 fn parse_args() -> Result<Arguments, clap::Error> {
     let CONFIG_FILE = "./config.json";
-    let matches = App::new("Triggers Function Execution using MainWorkers and WebWorkers")
+    let matches = App::new("Execute functions with WebWorkers")
         .version("1.0")
         .author("Maximilian & Riccardo")
-        .about("Trigger js function execution in deno through NATS using different types of workers")
+        .about("Execute functions in WebWorkers")
         .arg(
             Arg::new("config-file")
                 .short('c')
@@ -61,12 +61,12 @@ fn configure_logger() {
                 record.args()
             )
         })
-        .filter(None, LevelFilter::Info) // discard everything below level INFO
+        .filter(None, LevelFilter::Info)
         .init();
 }
 
 
-#[tokio::main] // async function -> executed when runtime instance is created
+#[tokio::main]
 async fn main() -> std::io::Result<()> {
     configure_logger();
 
@@ -80,13 +80,9 @@ async fn main() -> std::io::Result<()> {
         Err(err) => panic!("Unable to load and parse configuration: {:?}", err),
     };
 
-    //info!("Configuration = {:?}", configuration);
-
-    // connect to NATS server
+    // NATS client
     let address = configuration.nats_server.parse().unwrap();
     let client = Client::new(vec![address]); // nats client listening to the given port
-
-    // Connect to the server
     client.connect().await;
 
     // define a handle for each function to be triggered

@@ -16,6 +16,24 @@ passing technique. No global objects could be created to impact other WebWorkers
 The list of all permissions are: ```read, write, net, env, run, ffi, hrtime```.
 
 ## Performance Implications
+### Testing Environment
+To compare performances, testing environment has to be set.
+The environment is composed by: 
+- test function: [function-1.js](nats-receiver/functions/function-1.js),
+- runtime comparison value: as observed with a previous performance analysis, MainWorker executes [function-1.js](nats-receiver/functions/function-1.js) in around 1.7 seconds,
+- architecture to execute [function-1.js](nats-receiver/functions/function-1.js) in WebWorkers.
+
+#### Testing Architecture
+Different architectures have been proposed to trigger function execution from NATS into WebWorkers.  
+The main idea is to instantiate a MainWorker parsing the received NATS messages, and for each message, execute the corresponding function 
+in a different WebWorker. 
+To allow such triggering, a communication technique between the Rust Management System and the MainWorker has to be developed. 
+Furthermore, the MainWorker capabilities has be extended so to instantiate WebWorkers, measure their execution times and send back the performance data.
+
+#### Management System <-> MainWorker Communication
+The communications between Management System and MainWorker could be summarized as follows.
+[](report_images/ManagementSystem-MainWorkerCommunication.pdf)
+
 To assets performance implications, WebWorkers has to be instantiated from a MainWorker. 
 Currently, creation of web workers within MainWorkers has to be implemented. 
 
@@ -75,4 +93,5 @@ let create_web_worker_cb = Arc::new(|_| { // function is invoked when instantiat
 
 Currently, the MainWorker fails to instantiate the WebWorker, cause **invalid URL** error is thrown.
 
+###
 
