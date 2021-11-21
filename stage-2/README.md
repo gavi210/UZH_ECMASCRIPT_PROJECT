@@ -32,7 +32,7 @@ Furthermore, the MainWorker capabilities has be extended so to instantiate WebWo
 
 #### Management System <-> MainWorker Communication
 The communications between Management System and MainWorker could be summarized as follows.
-[](report_images/ManagementSystem-MainWorkerCommunication.pdf)
+![alt text](report_images/ManagementSystem-MainWorkerCommunication.pdf)
 
 To assets performance implications, WebWorkers has to be instantiated from a MainWorker. 
 Currently, creation of web workers within MainWorkers has to be implemented. 
