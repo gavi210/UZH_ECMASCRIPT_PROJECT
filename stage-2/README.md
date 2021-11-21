@@ -54,3 +54,6 @@ To evaluate the statement, the MainWorker has to instantiate a new WebWorker ins
 To do this, a ``ModuleSpecifier`` in the format ``file:///<path_to_module/<module>.js`` has to be provided. But import using such reference
 is currently not supported by the WebWorkers. Therefore, the MainWorker fails to create the WebWorker, since its main module cannot be loaded.
 
+#### Outcomes
+Even though we weren't able to instantiate WebWorkers, we learned more in detail how WebWorkers are created and how to deal with them. 
+The [execute_function()](nats-receiver/src/web_worker_manager.rs) could be used in the future as a reference on how to create WebWorkers.

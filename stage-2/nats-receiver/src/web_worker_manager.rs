@@ -19,6 +19,8 @@ use std::rc::Rc;
 use std::sync::Arc;
 use url::Url;
 
+use std::ptr;
+
 fn get_error_class_name(e: &AnyError) -> &'static str {
     deno_runtime::errors::get_error_class_name(e).unwrap_or("Error")
 }
@@ -29,9 +31,14 @@ pub async fn execute_function(
     message: rants::Msg,
 ) -> Result<(), AnyError> {
 
-    let module_loader = Rc::new(FsModuleLoader); // maybe define the path
+    let module_loader = Rc::new(FsModuleLoader); // default module loader
 
-    let create_web_worker_cb = Arc::new(|args : CreateWebWorkerArgs| { // function is invoked when instantiating a new worker
+    // function is invoked when instantiating a new worker
+    // args:
+    // - args.main_module: reference to the module specified in the js code when creating the worker.
+    //  It points to the module specified with ``new Worker('<module>.js')``.
+    // - worker_type: is provided by the parent worker and has to set as worker_type for the web worker
+    let create_web_worker_cb = Arc::new(|args : CreateWebWorkerArgs| {
         let string = format!("{}{}", "./functions", args.main_module.path());
         let js_path = Path::new(&string); // path to file -> same as one provided as input parameter
 
@@ -47,9 +54,9 @@ pub async fn execute_function(
         let web_worker_options = WebWorkerOptions {
             bootstrap: BootstrapOptions {
                 apply_source_maps: true,
-                args: vec![],
+                args: vec![], // arguments provided
                 cpu_count: 1,
-                debug_flag: false,
+                debug_flag: false, // debug messages -> true will print received NATS message
                 enable_testing_features: true,
                 location: Some(module_specifier.clone()),
                 no_color: false,
@@ -134,7 +141,7 @@ pub async fn execute_function(
     let permissions = Permissions::allow_all();
 
     let mut worker = MainWorker::bootstrap_from_options(module_specifier.clone(), permissions, options);
-    worker.execute_main_module(&module_specifier).await?;
+    worker.execute_main_module(&module_specifier).await?; // reference to the worker could be stored somewhere else
 
     info!("Finish executing function: {:?}", f.name);
     Ok(())
