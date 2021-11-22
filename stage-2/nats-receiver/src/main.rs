@@ -45,7 +45,7 @@ async fn main() -> std::io::Result<()> {
 
                       let start_time = Instant::now();
                       let _worker_output = match web_worker_manager::execute_function(function, message)  {
-                      //let worker_output = match worker::execute_function_web_worker(function, message)  {
+                      //let worker_output = match worker::execute_function(function, message)  {
                         Ok(_worker_output) => (),
                         Err(err) => panic!("Function execution terminated in error: {:?}", err),
                       };

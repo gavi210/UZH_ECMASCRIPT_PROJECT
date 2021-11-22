@@ -57,3 +57,20 @@ is currently not supported by the WebWorkers. Therefore, the MainWorker fails to
 #### Outcomes
 Even though we weren't able to instantiate WebWorkers, we learned more in detail how WebWorkers are created and how to deal with them. 
 The [execute_function()](nats-receiver/src/web_worker_manager.rs) could be used in the future as a reference on how to create WebWorkers.
+
+
+Execution with MainWorkers: 809.815604ms
+
+WebWorkers:
+[
+725.966544,
+710.617326,
+712.24197,
+715.0483869999998,
+717.833928,
+715.6802699999998,
+708.4899869999999,
+711.336241,
+716.0352069999999,
+714.6845409999996
+]
