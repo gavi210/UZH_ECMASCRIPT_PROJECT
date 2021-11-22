@@ -1,7 +1,7 @@
 /*
 console.log("Creating WebWorker 1");
-var myWorker = new Worker('/Users/riccardo_rigoni/University/erasmus_svizzera/courses_material/SoftwareMaintenanceAndEvolution/project/UZH_ECMASCRIPT_PROJECT/stage-2/nats-receiver/functions/function-1.js',{type: "module"});
-//var myWorker2 = new Worker('/Users/riccardo_rigoni/University/erasmus_svizzera/courses_material/SoftwareMaintenanceAndEvolution/project/UZH_ECMASCRIPT_PROJECT/stage-2/nats-receiver/functions/function-2.js',{type: "module"});
+var myWorker = new Worker('/Users/riccardo_rigoni/University/erasmus_svizzera/courses_material/SoftwareMaintenanceAndEvolution/project/UZH_ECMASCRIPT_PROJECT/stage-2/nats-receiver/functions/web-worker-module.js',{type: "module"});
+//var myWorker2 = new Worker('/Users/riccardo_rigoni/University/erasmus_svizzera/courses_material/SoftwareMaintenanceAndEvolution/project/UZH_ECMASCRIPT_PROJECT/stage-2/nats-receiver/functions/main-worker-test-function.js',{type: "module"});
 
 myWorker.postMessage("Sample message");
 
@@ -11,33 +11,36 @@ myWorker.addEventListener("message", function(event) {
 });
  */
 
-function createWorker(path) {
+function createWorker(path, iterations) {
     return new Promise(function(resolve, reject) {
         var v = new Worker(path,{type: "module"});
-        v.postMessage(i);
+        v.postMessage(iterations);
+
         v.onmessage = function(event){
-            // If you report errors via messages, you'd have a branch here for checking
-            // for an error and either calling `reject` or `resolve` as appropriate.
             resolve(event.data)
-            console.log("Received Message: ", event.data);
+            //console.log("Received Message: ", event.data);
             return event.data;
         };
-        // OR:
+
         v.onerror = function(event) {
-            // Rejects the promise using the error associated with the ErrorEvent
             reject(event.error);
         };
     });
 }
 
-const PATH = '/Users/riccardo_rigoni/University/erasmus_svizzera/courses_material/SoftwareMaintenanceAndEvolution/project/UZH_ECMASCRIPT_PROJECT/stage-2/nats-receiver/functions/function-1.js';
+const test_iterations = Deno.args[0];
+const loop_iterations = Deno.args[1];
+
+const PATH = '/Users/riccardo_rigoni/University/erasmus_svizzera/courses_material/SoftwareMaintenanceAndEvolution/project/UZH_ECMASCRIPT_PROJECT/stage-2/nats-receiver/functions/web-worker-module.js';
 var execution_times = [];
-for(var i = 0; i < 10; i++) {
+
+for(var i = 0; i < test_iterations; i++) {
     const t0 = performance.now();
-    await createWorker(PATH);
+    await createWorker(PATH, loop_iterations);
     const t1 = performance.now();
     execution_times.push(t1-t0);
 }
 
+console.log("WebWorkers Execution Times");
 console.log(execution_times);
 

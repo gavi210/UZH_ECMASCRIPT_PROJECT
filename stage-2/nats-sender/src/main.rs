@@ -12,6 +12,7 @@ use log::LevelFilter;
 
 mod config;
 mod functions;
+mod nats_messages;
 
 #[derive(Serialize, Deserialize, Debug)]
 struct Arguments { // stores arguments passed as input parameters - allows custom execution
@@ -91,18 +92,25 @@ async fn main() -> std::io::Result<()> {
       subjects.push(subject.parse().unwrap());
     }
 
+    const TEST_ITERATIONS : usize = 10;
+    const LOOP_ITERATIONS : usize = 1000000;
 
-    for i in 1..2 {
-      println!("Sending messages");
-      // send hello message to each subject
-          for subject in subjects.iter() {
-            client
-               .publish(&subject, b"Hello from sender!")
-               .await
-               .unwrap();
-          }
+    let nats_message = nats_messages::NatsMessage {
+      test_iterations : TEST_ITERATIONS,
+      loop_iterations : LOOP_ITERATIONS
+    };
+
+    let json_str = serde_json::to_string(&nats_message)?;
+    let bytes = json_str.as_bytes();
+
+    // send message -> repeat test 10 times
+    for subject in subjects.clone() {
+      client.publish(&subject, bytes)
+        .await
+        .unwrap();
     }
 
+    // stop subjects
     for subject in subjects.iter() {
       client
         .publish(&subject, b"STOP")
@@ -113,9 +121,6 @@ async fn main() -> std::io::Result<()> {
 
     // stop receiving messages
     client.disconnect().await;
-
-    info!("All messages have been sent correctly");
-
     Ok(())
 
 }

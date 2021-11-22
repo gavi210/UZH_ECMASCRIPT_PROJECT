@@ -19,9 +19,9 @@ The list of all permissions are: ```read, write, net, env, run, ffi, hrtime```.
 ### Testing Environment
 To compare performances, testing environment has to be set.
 The environment is composed by: 
-- test function: [function-1.js](nats-receiver/functions/function-1.js),
-- runtime comparison value: as observed with a previous performance analysis, MainWorker executes [function-1.js](nats-receiver/functions/function-1.js) in around 1.7 seconds,
-- architecture to execute [function-1.js](nats-receiver/functions/function-1.js) in WebWorkers.
+- test function: [web-worker-module.js](nats-receiver/functions/web-worker-module.js),
+- runtime comparison value: as observed with a previous performance analysis, MainWorker executes [web-worker-module.js](nats-receiver/functions/web-worker-module.js) in around 1.7 seconds,
+- architecture to execute [web-worker-module.js](nats-receiver/functions/web-worker-module.js) in WebWorkers.
 
 #### Testing Architecture
 A simple architecture has been proposed to trigger function execution from NATS into WebWorkers.  

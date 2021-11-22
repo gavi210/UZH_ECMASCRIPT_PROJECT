@@ -18,6 +18,7 @@ use std::path::Path;
 use std::rc::Rc;
 use std::sync::Arc;
 use url::Url;
+use crate::util::nats_messages::NatsMessage;
 
 use std::ptr;
 
@@ -26,12 +27,18 @@ fn get_error_class_name(e: &AnyError) -> &'static str {
 }
 
 #[tokio::main]
-pub async fn execute_function(
+pub async fn run_test(
     f: functions::FunctionDefinition,
-    message: rants::Msg,
+    raw_message : rants::Msg,
 ) -> Result<(), AnyError> {
 
     let module_loader = Rc::new(FsModuleLoader); // default module loader
+    let payload = raw_message.payload();
+    let str_message = match std::str::from_utf8(payload) {
+        Ok(v) => v,
+        Err(e) => panic!("Invalid UTF-8 sequence: {}", e),
+    };
+    let nats_message : NatsMessage = serde_json::from_str(&str_message).unwrap();
 
     // function is invoked when instantiating a new worker
     // args:
@@ -93,17 +100,11 @@ pub async fn execute_function(
     let location_as_url_string = "file://".to_string();
     let parsed_location = Url::parse(&location_as_url_string).unwrap();
 
-    let p = message.payload();
-    let message_contents = match std::str::from_utf8(p) {
-        Ok(v) => v,
-        Err(e) => panic!("Invalid UTF-8 sequence: {}", e),
-    };
-
     // instantiate MainWorker with callback for WebWorkers
     let options = WorkerOptions {
         bootstrap: BootstrapOptions {
             apply_source_maps: false,
-            args: vec![message_contents.to_string()], // accessible Deno.args
+            args: vec![nats_message.test_iterations.to_string(), nats_message.loop_iterations.to_string()],
             cpu_count: 1,
             debug_flag: false,
             enable_testing_features: false,

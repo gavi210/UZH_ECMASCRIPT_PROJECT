@@ -65,9 +65,9 @@ I'm embedding deno in rust and I'm facing some difficulties in instantiating web
 I have the following .js code being executed by a MainWorker. 
 ```javascript
 // ./functions/function-web-worker-creator.js
-var myWorker = new Worker('function-1.js');
+var myWorker = new Worker('web-worker-module.js');
 ```
-The code should instantiates a web worker running the "function-1.js" file. The "function-1.js" is located in the same folder
+The code should instantiates a web worker running the "web-worker-module.js" file. The "web-worker-module.js" is located in the same folder
 as the "function-web-worker-creator.js" file.
 Follows the rust code embedding Main and WebWorkers.
 ```rust
@@ -142,7 +142,7 @@ pub async fn execute_function(
         let permissions = Permissions::allow_all();
         let WORKER_NAME: String = "WebWorker".to_string();
 
-        let js_path = Path::new("./functions/function-1.js"); // hard-coded path to module for the WebWorker
+        let js_path = Path::new("./functions/web-worker-module.js"); // hard-coded path to module for the WebWorker
 
         let module_specifier = match deno_core::resolve_path(&js_path.to_string_lossy()) {
           Ok(module_specifier) => module_specifier,

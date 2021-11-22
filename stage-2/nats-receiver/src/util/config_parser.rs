@@ -9,7 +9,7 @@ pub struct Arguments {
     config_file: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Configuration {
     pub nats_server: String,
     pub functions: Vec<FunctionDefinition>

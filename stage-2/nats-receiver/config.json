@@ -10,6 +10,16 @@
       "output_destinations": "output.dest",
       "permit_network_access": true,
       "permitted_hosts": []
+    },
+    {
+      "name": "function-main-worker-creator",
+      "nats_subject_trigger": "subject-main-worker-creator",
+      "nats_subject_trigger_type": "test-function-trigger-type",
+      "runtime_type": "runtime-type",
+      "function_definition": "./functions/main-worker-test-function.js",
+      "output_destinations": "output.dest",
+      "permit_network_access": true,
+      "permitted_hosts": []
     }
   ]
 }

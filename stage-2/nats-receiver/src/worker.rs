@@ -17,6 +17,9 @@ use std::path::Path;
 use std::rc::Rc;
 use std::sync::Arc;
 use url::Url;
+use std::time::{Instant, Duration};
+
+use crate::util::nats_messages::NatsMessage;
 
 #[derive(Debug, Clone)]
 pub struct Worker {
@@ -28,57 +31,25 @@ fn get_error_class_name(e: &AnyError) -> &'static str {
 }
 
 #[tokio::main]
-pub async fn execute_function(
+pub async fn run_test(
     f: functions::FunctionDefinition, // obj describing function to be executed
-    message: rants::Msg, // input received from NATS
-) -> Result<(), AnyError> {
+    raw_message : rants::Msg
+) -> Result<Vec<Duration>, AnyError> {
+
 
     let main_module_filename = f.function_definition; // where function is defined
 
-    let module_loader = Rc::new(FsModuleLoader);
-    let create_web_worker_cb = Arc::new(|_| { // thread safe pointer
-        todo!("Web workers are not supported in the example");
-    });
+    let payload = raw_message.payload();
+    let str_message = match std::str::from_utf8(payload) {
+        Ok(v) => v,
+        Err(e) => panic!("Invalid UTF-8 sequence: {}", e),
+    };
+    let nats_message : NatsMessage = serde_json::from_str(&str_message).unwrap();
 
     let location_as_url_string = "https://approuter.dev".to_string();
     let parsed_location = Url::parse(&location_as_url_string).unwrap();
 
-    let p = message.payload();
-    let message_contents = match std::str::from_utf8(p) {
-        Ok(v) => v,
-        Err(e) => panic!("Invalid UTF-8 sequence: {}", e),
-    };
 
-    let options = WorkerOptions {
-        bootstrap: BootstrapOptions {
-            apply_source_maps: false,
-            args: vec![message_contents.to_string()],
-            cpu_count: 1,
-            debug_flag: true,
-            enable_testing_features: true,
-            location: Some(parsed_location),
-            no_color: false,
-            runtime_version: "x".to_string(),
-            ts_version: "x".to_string(),
-            unstable: true,
-        },
-        extensions: vec![],
-        unsafely_ignore_certificate_errors: None,
-        root_cert_store: None,
-        user_agent: "hello_runtime".to_string(),
-        seed: None,
-        js_error_create_fn: None,
-        create_web_worker_cb,
-        maybe_inspector_server: None,
-        should_break_on_first_statement: false,
-        module_loader,
-        get_error_class_fn: Some(&get_error_class_name),
-        origin_storage_dir: None,
-        blob_store: BlobStore::default(),
-        broadcast_channel: InMemoryBroadcastChannel::default(),
-        shared_array_buffer_store: None,
-        compiled_wasm_module_store: None,
-    };
 
     let js_path = Path::new(&main_module_filename); // path to file
 
@@ -89,13 +60,58 @@ pub async fn execute_function(
 
     let permissions = Permissions::allow_all();
 
-    let mut worker = MainWorker::bootstrap_from_options(module_specifier.clone(), permissions, options);
+    let mut execution_times = vec![];
 
-    worker.execute_main_module(&module_specifier).await?;
-    worker.run_event_loop(false).await?;
+    for i in 0..nats_message.test_iterations {
+        let start_time = Instant::now();
 
-    info!("Finish executing function: {:?}", f.name);
-    Ok(())
+        let module_loader = Rc::new(FsModuleLoader);
+        let create_web_worker_cb = Arc::new(|_| { // thread safe pointer
+            todo!("Web workers are not supported in the example");
+        });
+
+        let location_as_url_string = "https://approuter.dev".to_string();
+        let parsed_location = Url::parse(&location_as_url_string).unwrap();
+
+        let options = WorkerOptions {
+          bootstrap: BootstrapOptions {
+              apply_source_maps: false,
+              args: vec![nats_message.loop_iterations.to_string()],
+              cpu_count: 1,
+              debug_flag: false,
+              enable_testing_features: true,
+              location: Some(parsed_location),
+              no_color: false,
+              runtime_version: "x".to_string(),
+              ts_version: "x".to_string(),
+              unstable: true,
+          },
+          extensions: vec![],
+          unsafely_ignore_certificate_errors: None,
+          root_cert_store: None,
+          user_agent: "hello_runtime".to_string(),
+          seed: None,
+          js_error_create_fn: None,
+          create_web_worker_cb,
+          maybe_inspector_server: None,
+          should_break_on_first_statement: false,
+          module_loader,
+          get_error_class_fn: Some(&get_error_class_name),
+          origin_storage_dir: None,
+          blob_store: BlobStore::default(),
+          broadcast_channel: InMemoryBroadcastChannel::default(),
+          shared_array_buffer_store: None,
+          compiled_wasm_module_store: None,
+      };
+      let mut worker = MainWorker::bootstrap_from_options(module_specifier.clone(), permissions.clone(), options);
+
+      worker.execute_main_module(&module_specifier).await?;
+      worker.run_event_loop(false).await?;
+
+      let duration = start_time.elapsed();
+      execution_times.push(duration);
+    }
+    Ok(execution_times)
 }
 
 
