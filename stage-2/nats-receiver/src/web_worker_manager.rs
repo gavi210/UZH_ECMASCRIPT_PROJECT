@@ -57,7 +57,7 @@ pub async fn execute_function(
                 args: vec![], // arguments provided
                 cpu_count: 1,
                 debug_flag: false, // debug messages -> true will print received NATS message
-                enable_testing_features: true,
+                enable_testing_features: false,
                 location: Some(module_specifier.clone()),
                 no_color: false,
                 runtime_version: "x".to_string(),
@@ -90,7 +90,7 @@ pub async fn execute_function(
               module_specifier.clone(), worker_id, web_worker_options);
     });
 
-    let location_as_url_string = "https://example.com".to_string();
+    let location_as_url_string = "file://".to_string();
     let parsed_location = Url::parse(&location_as_url_string).unwrap();
 
     let p = message.payload();
@@ -106,7 +106,7 @@ pub async fn execute_function(
             args: vec![message_contents.to_string()], // accessible Deno.args
             cpu_count: 1,
             debug_flag: false,
-            enable_testing_features: true,
+            enable_testing_features: false,
             location: Some(parsed_location),
             no_color: false,
             runtime_version: "x".to_string(),
