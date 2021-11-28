@@ -88,3 +88,13 @@ at every instantiation, a new ``Isolate`` and ``Context`` is loaded. Therefore, 
 no difference in performance emerged. 
 To speed-up function execution in WebWorkers, workers must be reused, so to avoid set-up delays. Further investigation will 
 be done in this direction. 
+
+## MainWorker <-> WebWorker Communication
+[ops::worker_host](https://docs.rs/deno_runtime/latest/src/deno_runtime/ops/worker_host.rs.html#3-357) implementation specifies
+that the only way to communicate with the worker in via ``worker.internal_channel``.
+
+Each WebWorker opens a new ``std::sync::mpsc::Channel``, which is used to communicate with the parent.
+An instance of ``std::sync::mpsc::Receiver`` is named ***external handle***, and it is sent back to the parent, so that it is able
+to receive messages sent by the child.
+An instance of ``std:.sync::mpsc::Sender`` is named ***internal handle***, and it is used by the web worker to send messages over the ``mpsc::Channel``.
+
