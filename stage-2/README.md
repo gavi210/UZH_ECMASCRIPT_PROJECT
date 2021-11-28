@@ -12,8 +12,9 @@ As mentioned [here](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers
 Therefore, data in the parent workers shouldn't be accessible from the WebWorker. The only way to share data is through message
 passing technique. No global objects could be created to impact other WebWorkers.
 
-```deno_runtime::permissions::Permissions;``` allows to specify which permissions each WebWorker has. 
-The list of all permissions are: ```read, write, net, env, run, ffi, hrtime```.
+Nevertheless, ``deno_runtime::permissions::Permissions;`` allows specifying which permissions each WebWorker has. 
+The list of all permissions are: ``read, write, net, env, run, ffi, hrtime``. Allowing permissions to WebWorkers may let
+to security threats: i.e. ``read, write`` allows modifying files in the same directory as the MainWorker.  
 
 ## Performance Comparison (MainWorker vs WebWorker)
 ### Testing Environment
@@ -38,39 +39,52 @@ The communications between Management System and MainWorker could be summarized 
 #### WebWorker Execution
 The [execute_function()](nats-receiver/src/web_worker_manager.rs) provides an example on how to instantiate WebWorkers.
 The [create_web_worker_cb](https://docs.rs/deno_runtime/0.34.0/deno_runtime/ops/worker_host/type.CreateWebWorkerCb.html) dynamic function
-has been implemented, and it is invoked every time the main worker instantiates a new worker. 
+has been implemented, and it is invoked every time the main worker instantiates a new worker.
 
-Nevertheless, after an in-depth analysis of the [deno_runtime](https://docs.rs/deno_runtime/0.34.0/deno_runtime/index.html) crate and a 
-talk with the deno community, emerged that dynamic WebWorkers instantiation is not supported yet. Therefore, performance comparison 
-cannot be conducted for the moment. 
-Follows a description of the concerns related to WebWorkers instantiation.
-
-#### WebWorkers instantiation concerns
-WebWorkers are instantiated via the MainWorker with the following js code snippet.
-```javascript
-var worker = new Worker('<module>.js');
+### Function Execution being measured
+To run the performance comparison, a simple function is executed.
 ```
-To evaluate the statement, the MainWorker has to instantiate a new WebWorker instance by referencing the ``<module>.js`` module.
-To do this, a ``ModuleSpecifier`` in the format ``file:///<path_to_module/<module>.js`` has to be provided. But import using such reference
-is currently not supported by the WebWorkers. Therefore, the MainWorker fails to create the WebWorker, since its main module cannot be loaded.
+for (var i = 0; i < iterations; i++) {
+        ;
+    }
+```
+``iterations`` parameter could be dynamically modified.
 
-#### Outcomes
-Even though we weren't able to instantiate WebWorkers, we learned more in detail how WebWorkers are created and how to deal with them. 
-The [execute_function()](nats-receiver/src/web_worker_manager.rs) could be used in the future as a reference on how to create WebWorkers.
+### Performance Comparison
+Following performance data have been obtained by setting ``iterations = 10000``.
 
-
-Execution with MainWorkers: 809.815604ms
-
-WebWorkers:
-[
-725.966544,
-710.617326,
-712.24197,
-715.0483869999998,
-717.833928,
-715.6802699999998,
-708.4899869999999,
-711.336241,
-716.0352069999999,
-714.6845409999996
+MainWorker: [
+74.741553ms,
+12.579586ms,
+26.552651ms,
+15.891756ms,
+13.911295ms,
+13.475766ms,
+13.45593ms,
+13.433826ms,
+14.139253ms,
+13.484625ms
 ]
+
+WebWorkers: [
+30.358123000000003,
+24.004389999999994,
+18.141260000000003,
+16.883055999999996,
+17.133387,
+15.995173999999992,
+17.17697800000002,
+17.203782000000018,
+27.79907,
+21.666500000000013
+]
+
+As could be noticed, no significant performance difference could be noticed.
+
+### Outcome Conclusion
+As opposite to what the developers had expected, no significant performance difference could be noticed.
+After an inspection of the code, emerged that the procedure to instantiate each MainWorker and WebWorker is in ``deno`` implemented the same: 
+at every instantiation, a new ``Isolate`` and ``Context`` is loaded. Therefore, since the set-up work for the workers is the same, 
+no difference in performance emerged. 
+To speed-up function execution in WebWorkers, workers must be reused, so to avoid set-up delays. Further investigation will 
+be done in this direction. 

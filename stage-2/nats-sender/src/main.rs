@@ -93,7 +93,7 @@ async fn main() -> std::io::Result<()> {
     }
 
     const TEST_ITERATIONS : usize = 10;
-    const LOOP_ITERATIONS : usize = 1000000;
+    const LOOP_ITERATIONS : usize = 10000;
 
     let nats_message = nats_messages::NatsMessage {
       test_iterations : TEST_ITERATIONS,
