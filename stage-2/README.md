@@ -51,32 +51,32 @@ for (var i = 0; i < iterations; i++) {
 ``iterations`` parameter could be dynamically modified.
 
 ### Performance Comparison
-Following performance data have been obtained by setting ``iterations = 10000``.
+Following performance data have been obtained by setting ``iterations = 10000000``.
 
 MainWorker: [
-74.741553ms,
-12.579586ms,
-26.552651ms,
-15.891756ms,
-13.911295ms,
-13.475766ms,
-13.45593ms,
-13.433826ms,
-14.139253ms,
-13.484625ms
+459.543518ms, 
+456.006672ms, 
+448.712379ms, 
+439.332617ms, 
+447.088314ms, 
+445.702962ms, 
+458.252155ms, 
+447.97186ms, 
+443.961152ms, 
+444.470175ms
 ]
 
 WebWorkers: [
-30.358123000000003,
-24.004389999999994,
-18.141260000000003,
-16.883055999999996,
-17.133387,
-15.995173999999992,
-17.17697800000002,
-17.203782000000018,
-27.79907,
-21.666500000000013
+459.740987,
+462.12933,
+454.1517849999999,
+445.3357199999998,
+453.29438099999993,
+450.8542970000003,
+470.313803,
+448.2627430000002,
+451.08487200000036,
+452.7584130000005
 ]
 
 As could be noticed, no significant performance difference could be noticed.
