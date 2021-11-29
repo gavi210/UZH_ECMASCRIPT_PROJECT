@@ -92,14 +92,13 @@ async fn main() -> std::io::Result<()> {
       subjects.push(subject.parse().unwrap());
     }
 
-    const TEST_ITERATIONS : usize = 10;
-    const LOOP_ITERATIONS : usize = 10000;
+    const TEST_ITERATIONS : usize = 2;
+    const LOOP_ITERATIONS : usize = 10000000;
     const NBR_WORKERS : usize = 3;
 
     let nats_message = nats_messages::NatsMessage {
       test_iterations : TEST_ITERATIONS,
-      loop_iterations : LOOP_ITERATIONS,
-      nbr_workers : NBR_WORKERS
+      loop_iterations : LOOP_ITERATIONS
     };
 
     let json_str = serde_json::to_string(&nats_message)?;

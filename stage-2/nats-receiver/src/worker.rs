@@ -36,23 +36,21 @@ pub async fn run_test(
     raw_message : rants::Msg
 ) -> Result<Vec<Duration>, AnyError> {
 
-
-    let main_module_filename = f.function_definition; // where function is defined
-
+    // INFORMATION TO CUSTOMIZE THE TEST
     let payload = raw_message.payload();
     let str_message = match std::str::from_utf8(payload) {
         Ok(v) => v,
         Err(e) => panic!("Invalid UTF-8 sequence: {}", e),
     };
+    // stores the ``test_iterations`` : number of tests to be conducted
     let nats_message : NatsMessage = serde_json::from_str(&str_message).unwrap();
 
+    // VARIABLES TO INSTANTIATE THE MAIN WORKER
     let location_as_url_string = "https://approuter.dev".to_string();
     let parsed_location = Url::parse(&location_as_url_string).unwrap();
 
-
-
-    let js_path = Path::new(&main_module_filename); // path to file
-
+    let main_module_filename = f.function_definition; // points to empty module
+    let js_path = Path::new(&main_module_filename);
     let module_specifier = match deno_core::resolve_path(&js_path.to_string_lossy()) {
       Ok(module_specifier) => module_specifier,
       Err(e) => panic!("Cannot load function definition, {:?}", e),
@@ -60,52 +58,56 @@ pub async fn run_test(
 
     let permissions = Permissions::allow_all();
 
+    let module_loader = Rc::new(FsModuleLoader);
+    let create_web_worker_cb = Arc::new(|_| { // thread safe pointer
+        todo!("Web workers are not supported in the example");
+    });
+
+    let options = WorkerOptions {
+      bootstrap: BootstrapOptions {
+          apply_source_maps: false,
+          args: vec![nats_message.loop_iterations.to_string()],
+          cpu_count: 1,
+          debug_flag: false,
+          enable_testing_features: true,
+          location: Some(parsed_location),
+          no_color: false,
+          runtime_version: "x".to_string(),
+          ts_version: "x".to_string(),
+          unstable: true,
+      },
+      extensions: vec![],
+      unsafely_ignore_certificate_errors: None,
+      root_cert_store: None,
+      user_agent: "hello_runtime".to_string(),
+      seed: None,
+      js_error_create_fn: None,
+      create_web_worker_cb,
+      maybe_inspector_server: None,
+      should_break_on_first_statement: false,
+      module_loader,
+      get_error_class_fn: Some(&get_error_class_name),
+      origin_storage_dir: None,
+      blob_store: BlobStore::default(),
+      broadcast_channel: InMemoryBroadcastChannel::default(),
+      shared_array_buffer_store: None,
+      compiled_wasm_module_store: None,
+    };
+
+    // MAIN WORKER EXECUTING THE TEST FUNCTIONS
+    let mut worker = MainWorker::bootstrap_from_options(module_specifier.clone(), permissions, options);
+    worker.execute_main_module(&module_specifier).await?;
+    worker.run_event_loop(false).await?;
+
+    // TESTING ENVIRONMENT IS SETUP
     let mut execution_times = vec![];
 
     for i in 0..nats_message.test_iterations {
-        let start_time = Instant::now();
-
-        let module_loader = Rc::new(FsModuleLoader);
-        let create_web_worker_cb = Arc::new(|_| { // thread safe pointer
-            todo!("Web workers are not supported in the example");
-        });
-
-        let location_as_url_string = "https://approuter.dev".to_string();
-        let parsed_location = Url::parse(&location_as_url_string).unwrap();
-
-        let options = WorkerOptions {
-          bootstrap: BootstrapOptions {
-              apply_source_maps: false,
-              args: vec![nats_message.loop_iterations.to_string()],
-              cpu_count: 1,
-              debug_flag: false,
-              enable_testing_features: true,
-              location: Some(parsed_location),
-              no_color: false,
-              runtime_version: "x".to_string(),
-              ts_version: "x".to_string(),
-              unstable: true,
-          },
-          extensions: vec![],
-          unsafely_ignore_certificate_errors: None,
-          root_cert_store: None,
-          user_agent: "hello_runtime".to_string(),
-          seed: None,
-          js_error_create_fn: None,
-          create_web_worker_cb,
-          maybe_inspector_server: None,
-          should_break_on_first_statement: false,
-          module_loader,
-          get_error_class_fn: Some(&get_error_class_name),
-          origin_storage_dir: None,
-          blob_store: BlobStore::default(),
-          broadcast_channel: InMemoryBroadcastChannel::default(),
-          shared_array_buffer_store: None,
-          compiled_wasm_module_store: None,
-      };
-      let mut worker = MainWorker::bootstrap_from_options(module_specifier.clone(), permissions.clone(), options);
-
-      worker.execute_main_module(&module_specifier).await?;
+      let start_time = Instant::now();
+      // as mentioned in the JSRuntime documentation, execution is synchronous function -> thread will wait till completion
+      worker.execute_script("<test>", r#"
+                                      test_function();
+                                      "#).unwrap();
       worker.run_event_loop(false).await?;
 
       let duration = start_time.elapsed();
@@ -113,7 +115,6 @@ pub async fn run_test(
     }
     Ok(execution_times)
 }
-
 
 #[tokio::main]
 pub async fn execute_function_web_worker(

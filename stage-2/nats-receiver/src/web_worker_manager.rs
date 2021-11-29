@@ -38,6 +38,7 @@ pub async fn run_test(
         Ok(v) => v,
         Err(e) => panic!("Invalid UTF-8 sequence: {}", e),
     };
+
     let nats_message : NatsMessage = serde_json::from_str(&str_message).unwrap();
 
     // function is invoked when instantiating a new worker

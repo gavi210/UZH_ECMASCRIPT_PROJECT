@@ -59,4 +59,26 @@ the JsRuntime associated is automatically picked up.
 Since previous comparison shows no difference in performances within Main and WebWorkers, MainWorkers are used to measure 
 execution time of function in alive workers.
 
+"<usage>",
+r#"
+// Print helper function, calling Deno.core.print()
+function print(value) {
+Deno.core.print(value.toString()+"\n");
+}
+const arr = [1, 2, 3];
+print("The sum of");
+print(arr);
+print("is");
+print(Deno.core.opSync('op_sum', arr));
+// And incorrect usage
+try {
+print(Deno.core.opSync('op_sum', 0));
+} catch(e) {
+print('Exception:');
+print(e);
+}
+"#,
+)
+.unwrap();
+
 

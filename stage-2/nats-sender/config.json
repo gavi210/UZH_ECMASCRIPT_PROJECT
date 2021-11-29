@@ -1,4 +1,4 @@
 {
   "nats_server": "localhost:4222",
-  "subjects": ["subject-web-worker-creator", "subject-main-worker-creator"]
+  "subjects": ["subject-main-worker-kept-alive"]
 }
