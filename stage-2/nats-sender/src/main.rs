@@ -92,7 +92,7 @@ async fn main() -> std::io::Result<()> {
       subjects.push(subject.parse().unwrap());
     }
 
-    const TEST_ITERATIONS : usize = 2;
+    const TEST_ITERATIONS : usize = 10;
     const LOOP_ITERATIONS : usize = 10000000;
     const NBR_WORKERS : usize = 3;
 
