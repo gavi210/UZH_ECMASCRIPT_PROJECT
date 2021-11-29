@@ -7,16 +7,7 @@ To run NATS server in Docker container:
 docker run -p 4222:4222 -ti nats:latest
 ```
 
-## Security Implication using WebWorkers
-As mentioned [here](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API), workers executes under a different global scope.
-Therefore, data in the parent workers shouldn't be accessible from the WebWorker. The only way to share data is through message
-passing technique. No global objects could be created to impact other WebWorkers.
-
-Nevertheless, ``deno_runtime::permissions::Permissions;`` allows specifying which permissions each WebWorker has. 
-The list of all permissions are: ``read, write, net, env, run, ffi, hrtime``. Allowing permissions to WebWorkers may let
-to security threats: i.e. ``read, write`` allows modifying files in the same directory as the MainWorker.  
-
-## Performance Comparison (MainWorker vs WebWorker)
+## Performance Comparison (MainWorker vs WebWorker vs ReusedMainWorker)
 ### Testing Environment
 To compare performances, testing environment has to be set.
 The environment is composed by: 
@@ -91,7 +82,6 @@ Reuse of MainWorker: [
 4.693492ms, 
 4.692548ms
 ]
-
 
 As could be noticed, no significant performance difference could be noticed.
 
