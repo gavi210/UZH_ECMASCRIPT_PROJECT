@@ -8,29 +8,8 @@ docker run -p 4222:4222 -ti nats:latest
 ```
 
 ## Performance Comparison (MainWorker vs WebWorker vs ReusedMainWorker)
-### Testing Environment
-To compare performances, testing environment has to be set.
-The environment is composed by: 
-- test function: [web-worker-module.js](nats-receiver/functions/web-worker-module.js),
-- runtime comparison value: as observed with a previous performance analysis, MainWorker executes [web-worker-module.js](nats-receiver/functions/web-worker-module.js) in around 1.7 seconds,
-- architecture to execute [web-worker-module.js](nats-receiver/functions/web-worker-module.js) in WebWorkers.
-
-#### Testing Architecture
-A simple architecture has been proposed to trigger function execution from NATS into WebWorkers.  
-The main idea is to instantiate a MainWorker parsing the received NATS messages, and for each message, execute the corresponding function 
-in a different WebWorker. 
-To allow such triggering, a communication technique between the Rust Management System and the MainWorker has to be developed. 
-Furthermore, the MainWorker capabilities has be extended so to instantiate WebWorkers, measure their execution times and send back the performance data.
-
-#### Management System <-> MainWorker Communication
-The communications between Management System and MainWorker could be summarized as follows.
-![plot](report_images/ManagementSystem-MainWorkerCommunication.png)
-[Local Ispector](https://docs.rs/deno_core/0.108.0/deno_core/struct.LocalInspectorSession.html) could be used to exchange messages.
-
-#### WebWorker Execution
-The [execute_function()](nats-receiver/src/web_worker_manager.rs) provides an example on how to instantiate WebWorkers.
-The [create_web_worker_cb](https://docs.rs/deno_runtime/0.34.0/deno_runtime/ops/worker_host/type.CreateWebWorkerCb.html) dynamic function
-has been implemented, and it is invoked every time the main worker instantiates a new worker.
+To execute multiple times the same function within a MainWorker, the function to be tested is declared at worker's instantiation time.
+Using the ``globalThis`` object, the function is made accessible by scripts executed in ``execute_script()``.
 
 ### Function Execution being measured
 To run the performance comparison, a simple function is executed.
@@ -83,22 +62,12 @@ Reuse of MainWorker: [
 4.692548ms
 ]
 
-As could be noticed, no significant performance difference could be noticed.
+As could be noticed, the execution time when reusing a MainWorker drops significantly, by two orders of magnitude.
+By looking at the execution times when reusing the worker, it could be notice that the first two times were much bigger than the 
+subsequent one. This could be explained by the JIT compilation used by ``v8`` engine. When the test function is compiled and optimized, 
+performances increases significantly.
 
-### Outcome Conclusion
-As opposite to what the developers had expected, no significant performance difference could be noticed.
-After an inspection of the code, emerged that the procedure to instantiate each MainWorker and WebWorker is in ``deno`` implemented the same: 
-at every instantiation, a new ``Isolate`` and ``Context`` is loaded. Therefore, since the set-up work for the workers is the same, 
-no difference in performance emerged. 
-To speed-up function execution in WebWorkers, workers must be reused, so to avoid set-up delays. Further investigation will 
-be done in this direction. 
-
-## MainWorker <-> WebWorker Communication
-[ops::worker_host](https://docs.rs/deno_runtime/latest/src/deno_runtime/ops/worker_host.rs.html#3-357) implementation specifies
-that the only way to communicate with the worker in via ``worker.internal_channel``.
-
-Each WebWorker opens a new ``std::sync::mpsc::Channel``, which is used to communicate with the parent.
-An instance of ``std::sync::mpsc::Receiver`` is named ***external handle***, and it is sent back to the parent, so that it is able
-to receive messages sent by the child.
-An instance of ``std:.sync::mpsc::Sender`` is named ***internal handle***, and it is used by the web worker to send messages over the ``mpsc::Channel``.
+### Conclusion
+- No significant difference could be noticed if using MainWorkers and WebWorkers to execute a function once,
+- Reusing a MainWorker to execute multiple time the same function will result in drastic increase of performances.
 
