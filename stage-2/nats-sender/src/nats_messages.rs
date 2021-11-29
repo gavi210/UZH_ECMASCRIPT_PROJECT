@@ -5,4 +5,5 @@ use serde::{Deserialize, Serialize};
 pub struct NatsMessage {
     pub test_iterations: usize,
     pub loop_iterations: usize,
+    pub nbr_workers: usize
 }

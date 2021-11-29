@@ -55,3 +55,8 @@ specify and trigger one context instead of another. The code execution is trigge
 the JsRuntime associated is automatically picked up.
 
 
+## Measure Code Execution With Alive Workers
+Since previous comparison shows no difference in performances within Main and WebWorkers, MainWorkers are used to measure 
+execution time of function in alive workers.
+
+
