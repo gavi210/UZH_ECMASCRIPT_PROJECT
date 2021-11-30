@@ -6,6 +6,11 @@ use log::info;
 use std::time::{Instant};
 use std::str;
 
+use std::sync::{Arc, Mutex};
+use std::thread;
+
+use deno_runtime::worker::MainWorker;
+
 mod functions;
 mod worker;
 mod web_worker_manager;
@@ -19,59 +24,71 @@ async fn main() -> std::io::Result<()> {
 
     let client = get_nats_client(&configuration.nats_server).await.unwrap();
 
-    let mut handles = vec![];
     const BUFFER_SIZE: usize = 1024;
 
-    for f in configuration.functions {
+    // get unique function being declared -> unique subject being triggered by sender
+    let f = &configuration.functions[0];
+    //define NATS subject
+    let subject = f.nats_subject_trigger.parse::<Subject>().unwrap();
+    let (_, mut sub) = client.subscribe(&subject, BUFFER_SIZE).await.unwrap();
 
-        // one subject per NATS receiver
-        let subject = f.nats_subject_trigger.parse::<Subject>().unwrap();
-        let (_, mut sub) = client.subscribe(&subject, BUFFER_SIZE).await.unwrap();
+    // set of workers to be used by the nats receiver
+    let mut workers : Vec<MainWorker> = vec![];
 
+    // try dispatching script execution
 
-        handles.push(task::spawn(async move {
-            loop {
-                let message = sub.recv().await.unwrap();
-                let payload = message.payload();
+    let WORKERS = 2;
+    for i in 0..WORKERS {
+      let new_worker = worker::get_new_worker(&f.function_definition).await.unwrap();
+      workers.push(new_worker);
+    }
 
-                match payload {
-                    b"STOP" => { // terminate the subject
-                      //info!("{:?} stopped!", f.nats_subject_trigger);
-                      break;
-                    },
-                    _ => {
-                        let function = f.clone();
-                        // execute web worker code
-                        if (function.nats_subject_trigger.eq("subject-web-worker-creator")) {
-                           tokio::task::spawn_blocking(|| { // spawn on a thread that could be blocked during execution
+    let mut messages_vec : Vec<String> = vec![];
+    let messages = Arc::new(Mutex::new(messages_vec));
+    let mut handles = vec![];
 
-                              let _worker_output = match web_worker_manager::run_test(function, message)  {
-                                Ok(_worker_output) => (),
-                                Err(err) => panic!("Function execution terminated in error: {:?}", err),
-                              };
-                              })
-                           .await
-                           .expect("Task panicked")
-                        }
-                        else {
-                            tokio::task::spawn_blocking(|| { // spawn on a thread that could be blocked during execution
-                                let execution_times = match worker::run_test(function, message)  {
-                                  Ok(worker_output) => worker_output,
-                                  Err(err) => panic!("Function execution terminated in error: {:?}", err),
-                                };
-                                println!("Main Worker Execution Times: {:?}", execution_times);
-                                })
-                            .await
-                            .expect("Task panicked")
-                        }
+    // define try use task::spawn
+    for _ in 0..10 {
+        let messages_cln = Arc::clone(&messages);
+        let handle = thread::spawn(move || {
+            let mut messages_mut = messages_cln.lock().unwrap();
 
-                    }
-                }
-            }
-        }));
+            *messages_mut.push("Hello from thread!".to_string());
+        });
+        handles.push(handle);
     }
 
 
+    for handle in handles {
+            handle.join().unwrap();
+        }
+
+    println!("Vector content: {:?}", *messages.lock().unwrap());
+
+
+
+    let handle = task::spawn(async move {
+        loop {
+            let message = sub.recv().await.unwrap();
+            let payload = message.payload();
+
+            match payload {
+                b"STOP" => { // terminate the subject
+                  break;
+                },
+                _ => {
+                    // find an available worker among the workers
+                    // trigger function execution -> should allow per NATS to send the function code to be executed
+                }
+            }
+        }
+    });
+
+    handle.await;
+    client.disconnect().await;
+
+    Ok(())
+}
     /*
     let web_worker_fn = configuration.functions[0];
     let main_worker_fn = configuration.functions[1];
@@ -150,12 +167,9 @@ async fn main() -> std::io::Result<()> {
     }));
 
     */
-    futures::future::join_all(handles).await;
-    client.disconnect().await;
 
-    Ok(())
 
-}
+
 
 // instantiate and connect NATS client
 async fn get_nats_client(nats_server : &String) -> Result<Client, AnyError> {

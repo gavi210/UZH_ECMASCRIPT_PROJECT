@@ -54,9 +54,14 @@ emerges that each isolate is associated with one context, since when invoking th
 specify and trigger one context instead of another. The code execution is triggered from the Isolate itself, therefore, 
 the JsRuntime associated is automatically picked up.
 
+## Dispatch function whenever incoming message
+Either two possibilities to dispatch function execution: 
+- look at current state of the workers, to find one free
+- queue all messages: share object within thread, whenever one thread finished processing a piece of information, waits until new
+ message coming in. When new message available, process it
 
-## Measure Code Execution With Alive Workers
-Since previous comparison shows no difference in performances within Main and WebWorkers, MainWorkers are used to measure 
-execution time of function in alive workers.
+## Shared-Array storing messages received
+
+
 
 
