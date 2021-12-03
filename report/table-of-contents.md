@@ -1,0 +1,48 @@
+# Table of Contents
+
+- Introduction
+  - General intro
+    - Use of Javascript/Typescript is growing (statistic?) - also on server side
+    - Use of serverless paradigm is increasing (statistic from AWS Lambda, reinvent this year?)
+      - Serverless paradigm more or less means event triggered lightweight functions
+    - Growth in IoT systems also aligns with this
+      - Many devices generating a lot of small data
+    - Interesting to investigate efficient solutions for supporting event triggered lightweight functions based on new technologies
+      - Primary objective is to understand how they perform and how to optimize them
+  - Project objectives
+    - List original project objectives
+    - How project scope was revised during project execution
+  - Structure of report
+    - One/two paras describing the contents of the rest of the report
+- Review of different JS runtimes
+  - Qualitative review
+    - Mention approach and criteria
+    - Include table with some commentary
+    - Note how we shortlisted to two specific runtimes (and indicate why two made sense)
+  - Quantitative review
+    - Document short experiments and conclusion
+    - Link to QuickJS performance results
+  - Conclusion of review of different runtimes
+- Technology introduction
+  - NATS
+    - What is NATS
+      - Include summary of features
+      - Why it was chosen for this work
+    - Short intro to concepts and architecture
+      - Topics, clustering, jetstream, kv and object store, security and access control
+  - Deno
+    - What is Deno
+      - Summary of features
+      - Why was it chosen for this work
+    - Short intro to concepts and architecture
+      - Built on v8, ESModule support, security enhancements, language bindings
+- Implementation and experimentation
+  - Getting a single function running in Deno
+  - Comparing Main workers and Web workers
+  - Reusing main workers
+  - Triggering Deno from NATS on single thread
+  - Triggering Deno from NATS with multiple threads
+- Conclusing remarks
+  - What were your primary learnings from the project?
+  - What did you learn regarding software process and software maintenance and evolution?
+  - What would you recommend for moving forward with this work
