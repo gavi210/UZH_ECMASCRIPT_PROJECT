@@ -24,156 +24,110 @@ async fn main() -> std::io::Result<()> {
     util::logger::configure_logger();
 
     let configuration = util::config_parser::get_configuration_object();
+    let f = &configuration.functions[0]; // main module to execute the main worker
 
     let client = get_nats_client(&configuration.nats_server).await.unwrap();
-
     const BUFFER_SIZE: usize = 1024;
 
-    // get unique function being declared -> unique subject being triggered by sender
-    let f = &configuration.functions[0];
     // define NATS subject
     let subject = f.nats_subject_trigger.parse::<Subject>().unwrap();
     let (_, mut sub) = client.subscribe(&subject, BUFFER_SIZE).await.unwrap();
 
-    // set of workers to be used by the nats receiver
-    /*
-    let mut workers : Vec<MainWorker> = vec![];
-    let WORKERS = 2;
-    // instantiate workers
-    for i in 0..WORKERS {
-      let new_worker = worker::get_new_worker(&f.function_definition).await.unwrap();
-      workers.push(new_worker);
-    }
-    */
-
-    // Create a simple Queue
+    // queue for sharing the messages
     let mut messages_queue: Queue<String> = queue![];
-
     // thread-safe pointer
     let messages_queue_arc = Arc::new(Mutex::new(messages_queue));
 
-    // encapsulates threads -> could be used for NATS subject and workers together?
-    //let mut handles = vec![];
-
-    /*
-    // define try use task::spawn
-    for _ in 0..10 {
-        let messages_cln = Arc::clone(&messages);
-        let handle = thread::spawn(move || {
-            let mut messages_mut = messages_cln.lock().unwrap();
-
-            messages_mut.push("Hello from thread!".to_string());
-        });
-        handles.push(handle);
-    }
-
-
-    for handle in handles {
-            handle.join().unwrap();
-        }
-
-    println!("Vector content: {:?}", *messages.lock().unwrap());
-
-    */
+    let THREADS = 2; // support threads running a main worker -> could be customized: maybe as cmd parameter
 
     // define thread for nats receiver
     let messages_queue_cln_nats_receiver = Arc::clone(&messages_queue_arc);
     let nats_receiver_handle = task::spawn(async move {
+      // as input the number of threads currently running -> stop all of them
+      // maybe passing integer still borrows the value
       loop {
-        // receive message
+
         let message = sub.recv().await.unwrap();
         let payload = message.payload();
-
-        // payload still reference from the message instantiated before
 
         match payload {
           b"STOP" => {
             info!("Received stopping sequence from nats subject");
-            messages_queue_cln_nats_receiver.lock().unwrap().add(String::from("STOP"));
-            drop(messages_queue_cln_nats_receiver);
-            info!("Adding stop message to the queue");
+            let mut message_queue = messages_queue_cln_nats_receiver.lock().unwrap();
+            for i in 0..THREADS {
+              message_queue.add(String::from("STOP"));
+            }
+            drop(message_queue);
+            info!("Stops the support threads");
             break;
           },
           _ => {
-            // messages_cln_nats_receiver.lock().unwrap().push(str::from_utf8(payload).unwrap().to_string());
+            // add message to the queue
             messages_queue_cln_nats_receiver.lock().unwrap().add(str::from_utf8(payload).unwrap().to_string());
           }
         }
       }
     });
 
+    // define threads for main workers
+    let mut thread_handles = vec![];
 
-    //let mut main_worker = worker::get_new_worker(&"./functions/functions-declaration.js".to_string()).await.unwrap();
+    for i in 0..THREADS {
+          // clone parameters being moved inside the thread
+         let function_definition = f.function_definition.clone();
+         let messages_queue_cln_worker = Arc::clone(&messages_queue_arc);
 
-    // another arc pointer for the main worker
-    let messages_queue_cln_worker = Arc::clone(&messages_queue_arc);
+         thread_handles.push(
+           thread::spawn(move || {
+             // within the thread create a new tokio event loop
+             let mut runtime = Runtime::new().expect("Unable to create the runtime");
 
-    // use tokio thread here to run worker
-    let main_worker_handle = thread::spawn(move {
-        // within the thread create a new tokio event loop
-
-        // for the moment easier to implement -> run only one worker on a specific thread
-
-        let mut main_worker = worker::get_new_worker(&"./functions/functions-declaration.js".to_string()).await.unwrap();
-        loop {
-          // get access to the messages
-          let mut queue_messages = messages_queue_cln_worker.lock().unwrap();
-
-          // if length == 0 -> no incoming functions to be executed
-          if (queue_messages.size() == 0) {
-            drop(queue_messages);
-            // wait for random time
-            let ten_millis = time::Duration::from_millis(1);
-            thread::sleep(ten_millis); // execute the loop again -> check whether new messages incoming
-          }
-          else {
-            // process the execution
-            let message = queue_messages.remove().unwrap();
-            let stopping_sequence : String = String::from("STOP");
-
-            // message in the queue to stop the workers
-            if(message.eq(&stopping_sequence)) {
-              info!("Main Worker stops!");
-              break;
-            }
-            else {
-                main_worker.execute_script("<test>", &message).unwrap();
-                main_worker.run_event_loop(false).await;
-            }
-          }
-        }
-    });
+             // block waiting the asynchronous function
+             runtime.block_on(async move {
+                 let mut main_worker = worker::get_new_worker(&function_definition.to_string()).await.unwrap();
+                 loop {
+                   // at every iteration, get access to the queue to process new incoming messages
+                   let mut queue_messages = messages_queue_cln_worker.lock().unwrap();
 
 
-    nats_receiver_handle.await;
-    main_worker_handle.await;
+                   if (queue_messages.size() == 0) { // no messages
+                     drop(queue_messages);
 
-    /*
-    // define thread for one worker
-    for worker in workers {
-      let handle = task::spawn(async move {
+                     // wait for random time -> give priority to NATS subject to inject messages
+                     let ten_millis = time::Duration::from_millis(1);
+                     thread::sleep(ten_millis);
+                   }
+                   else {
+                     // process the execution
+                     let message = queue_messages.remove().unwrap();
 
-        let mut thread_worker = worker;
-        // assign one worker per thread
-        loop {
-            let message = sub.recv().await.unwrap();
-            let payload = message.payload();
+                     drop(queue_messages); // from here queue not needed anymore
+                     let stopping_sequence : String = String::from("STOP");
 
-            match payload {
-                b"STOP" => { // terminate the subject
-                  break;
-                },
-                _ => {
-                    // find an available worker among the workers
-                    // trigger function execution -> should allow per NATS to send the function code to be executed
-                }
-            }
-        }
-    });
+                     // message in the queue to stop the workers
+                     if(message.eq(&stopping_sequence)) {
+                       info!("Main Worker stops!");
+                       break;
+                     }
+                     else {
+                         main_worker.execute_script("<test>", &message).unwrap();
+                         main_worker.run_event_loop(false).await;
+                     }
+                   }
+                 }
+             });
+         })
+       );
     }
-    */
 
-    // future::future::join_all().unwrap();
+    // nats receiver is added to the event_loop associated with the main thread
+    nats_receiver_handle.await;
+
+    // handle for another thread
+    for handle in thread_handles {
+      handle.join();
+    }
+
     client.disconnect().await;
 
     Ok(())
