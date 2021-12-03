@@ -173,6 +173,18 @@ pub async fn get_new_worker(
 }
 
 #[tokio::main]
+pub async fn execute_function(
+  worker : MainWorker,
+  message
+) -> Result<(), AnyError> {
+  main_worker.execute_script("<test>", &message).unwrap();
+  main_worker.run_event_loop(false).await?;
+
+  Ok(()
+}
+
+
+#[tokio::main]
 pub async fn execute_function_web_worker(
     f: functions::FunctionDefinition, // obj describing function to be executed
     message: rants::Msg, // input received from NATS

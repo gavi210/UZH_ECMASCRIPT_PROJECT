@@ -22,6 +22,7 @@ url = "2.2.2"
 log = "0.4.14"
 env_logger = "0.9.0"
 chrono = "0.4.19"
+queues = "1.0.2"
 
 [patch.crates-io]
 deno_runtime = { git = "https://github.com/denoland/deno", branch="main" }

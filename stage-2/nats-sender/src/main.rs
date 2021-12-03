@@ -92,6 +92,7 @@ async fn main() -> std::io::Result<()> {
       subjects.push(subject.parse().unwrap());
     }
 
+    /*
     const TEST_ITERATIONS : usize = 10;
     const LOOP_ITERATIONS : usize = 10000000;
 
@@ -102,10 +103,12 @@ async fn main() -> std::io::Result<()> {
 
     let json_str = serde_json::to_string(&nats_message)?;
     let bytes = json_str.as_bytes();
+    */
 
+    let message = b"greet()";
     // send message -> repeat test 10 times
     for subject in subjects.clone() {
-      client.publish(&subject, bytes)
+      client.publish(&subject, message)
         .await
         .unwrap();
     }

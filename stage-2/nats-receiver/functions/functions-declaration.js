@@ -1,3 +1,3 @@
-globalThis.dummy = 12;
-
-console.log("Executing MainWorker instance");
+globalThis.greet = function() {
+    console.log("greetings from the worker");
+}
