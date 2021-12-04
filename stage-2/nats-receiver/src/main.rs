@@ -3,6 +3,8 @@ use rants::{Client, Subject};
 use tokio::task;
 use log::info;
 use tokio::runtime::Runtime;
+use deno_core::serde_v8;
+use deno_core::v8;
 
 use std::str;
 
@@ -114,9 +116,44 @@ async fn main() -> std::io::Result<()> {
                        break;
                      }
                      else {
-                         main_worker.execute_script("<test>", &message).unwrap();
-                         main_worker.run_event_loop(false).await.unwrap();
-                         client.publish(&subject_results_receiver, b"executed function").await.unwrap();
+                        let context = &mut main_worker.js_runtime;
+
+                        // deserialize message into object
+                        let c: util::nats_messages::NatsMessage = serde_json::from_str(&message).unwrap();
+
+                        let res = context.execute_script("<test>", &c.message);
+                        let result = match res {
+                           Ok(global) => {
+                             let scope = &mut context.handle_scope();
+                             let local = v8::Local::new(scope, global);
+                             // Deserialize a `v8` object into a Rust type using `serde_v8`,
+                             // in this case deserialize to a JSON `Value`.
+                             let deserialized_value =
+                               serde_v8::from_v8::<serde_json::Value>(scope, local);
+
+                             match deserialized_value {
+                               Ok(value) => Ok(value),
+                               Err(err) => Err(format!("Cannot deserialize value: {:?}", err)),
+                             }
+                           }
+                           Err(err) => Err(format!("Evaling error: {:?}", err)),
+                         }.unwrap();
+
+                         let mut str_result : String;
+                         // deserialize the result depending on the type
+                          if result.is_string() {
+                             str_result = result.as_str().unwrap().to_string();
+                          }
+                          else {
+                            str_result = result.as_i64().unwrap().to_string();
+                          }
+
+                          let nats_message = util::nats_messages::NatsMessage {
+                            id : c.id,
+                            message : str_result
+                          };
+                          let str_nats_message = serde_json::to_string(&nats_message).unwrap();
+                          client.publish(&subject_results_receiver,str_nats_message.as_bytes()).await.unwrap();
                      }
                    }
                  }

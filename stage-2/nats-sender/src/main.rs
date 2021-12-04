@@ -3,6 +3,7 @@ use log::{info};
 use rants::{Client, Subject, Address};
 use serde::{Deserialize, Serialize};
 use tokio::task;
+use std::str;
 
 use std::io::Write;
 use chrono::Local;
@@ -90,19 +91,36 @@ async fn main() -> std::io::Result<()> {
       let client = Client::new(vec![address_sender_thread]);
       client.connect().await;
 
-      let message_greet = b"greet()";
-      let message_loop = b"loop(10)";
-      let message_log = b"log_this(\"Helloooooo\")";
 
+
+
+      /*
+      let message_loop = b"loop(10);";
+      let message_log = b"log_this(\"Helloooooo\");";
+
+      let message_double = b"double(2);";
+      */
+      let mut counter : usize = 0;
       for _ in 0..5 {
-        client.publish(&subject_function_executor, message_greet)
-           .await
-           .unwrap();
-        client.publish(&subject_function_executor, message_loop)
+        let message_greet = nats_messages::NatsMessage {
+          id : counter,
+          message : String::from("greet()"),
+        };
+
+        counter = counter +1;
+        let str_message_greet = serde_json::to_string(&message_greet).unwrap();
+        client.publish(&subject_function_executor, str_message_greet.as_bytes())
            .await
            .unwrap();
 
-        client.publish(&subject_function_executor, message_log)
+        let message_double = nats_messages::NatsMessage {
+          id : counter,
+          message : String::from("double(2);")
+        };
+        let str_message_double = serde_json::to_string(&message_double).unwrap();
+        counter = counter +1;
+        // publish message -> request to engine to double the number
+        client.publish(&subject_function_executor, str_message_double.as_bytes())
           .await
           .unwrap();
       }
@@ -134,7 +152,11 @@ async fn main() -> std::io::Result<()> {
               break;
             },
             _ => {
-              info!("Result received: {:?}", payload);
+              let msg = match str::from_utf8(payload) {
+                  Ok(v) => v,
+                  Err(e) => panic!("Invalid UTF-8 sequence: {}", e),
+              };
+              info!("Result received: {:?}", msg);
             }
           }
       }

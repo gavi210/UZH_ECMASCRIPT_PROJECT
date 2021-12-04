@@ -3390,13 +3390,3 @@ dependencies = [
  "syn 1.0.81",
  "synstructure",
 ]
-
-[[patch.unused]]
-name = "deno_core"
-version = "0.107.0"
-source = "git+https://github.com/denoland/deno?branch=main#dd91ecef502456ba39495d8e178f8101a87c0e34"
-
-[[patch.unused]]
-name = "deno_runtime"
-version = "0.33.0"
-source = "git+https://github.com/denoland/deno?branch=main#dd91ecef502456ba39495d8e178f8101a87c0e34"
