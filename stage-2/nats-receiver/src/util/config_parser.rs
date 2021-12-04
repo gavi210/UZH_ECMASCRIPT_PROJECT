@@ -12,7 +12,9 @@ pub struct Arguments {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Configuration {
     pub nats_server: String,
-    pub functions: Vec<FunctionDefinition>
+    pub functions: Vec<FunctionDefinition>,
+    pub subject_results_receiver: String,
+    pub subject_function_invoker: String
 }
 
 const CONFIG_FILE : &str = "./config.json";

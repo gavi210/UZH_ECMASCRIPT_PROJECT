@@ -10,5 +10,5 @@ pub struct FunctionDefinition {
     pub function_definition: String,
     pub output_destinations: String,
     pub permit_network_access: bool,
-    pub permitted_hosts: Vec<String>,
+    pub permitted_hosts: Vec<String>
 }

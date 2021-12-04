@@ -1,7 +1,6 @@
 use clap::{App, Arg};
-use futures::stream::StreamExt;
-use log::{info, trace, warn};
-use rants::{Client, Subject};
+use log::{info};
+use rants::{Client, Subject, Address};
 use serde::{Deserialize, Serialize};
 use tokio::task;
 
@@ -77,53 +76,75 @@ async fn main() -> std::io::Result<()> {
         Err(err) => panic!("Unable to load and parse configuration: {:?}", err),
     };
 
-    // info!("Configuration = {:?}", configuration);
+    let address : Address = configuration.nats_server.parse().unwrap();
+    // clone address for the two threads
+    let address_sender_thread = address.clone();
+    let address_receiver_thread = address.clone();
 
-    let address = configuration.nats_server.parse().unwrap();
-    let client = Client::new(vec![address]);
+    // get names of sender and receiver subjects
+    let subject_function_executor : Subject = configuration.subject_function_executor.parse().unwrap();
+    let subject_result_receiver : Subject = configuration.subject_result_receiver.parse().unwrap();
 
-    // Connect to the server
-    client.connect().await;
+    // thread for the sender
+    let nats_sender_handle = task::spawn(async move {
+      let client = Client::new(vec![address_sender_thread]);
+      client.connect().await;
 
-    let mut subjects: Vec<Subject> = Vec::new();
+      let message_greet = b"greet()";
+      let message_loop = b"loop(10)";
+      let message_log = b"log_this(\"Helloooooo\")";
 
-    // get reference for each subject
-    for subject in configuration.subjects.iter() {
-      subjects.push(subject.parse().unwrap());
-    }
+      for _ in 0..5 {
+        client.publish(&subject_function_executor, message_greet)
+           .await
+           .unwrap();
+        client.publish(&subject_function_executor, message_loop)
+           .await
+           .unwrap();
 
-    /*
-    const TEST_ITERATIONS : usize = 10;
-    const LOOP_ITERATIONS : usize = 10000000;
+        client.publish(&subject_function_executor, message_log)
+          .await
+          .unwrap();
+      }
 
-    let nats_message = nats_messages::NatsMessage {
-      test_iterations : TEST_ITERATIONS,
-      loop_iterations : LOOP_ITERATIONS
-    };
-
-    let json_str = serde_json::to_string(&nats_message)?;
-    let bytes = json_str.as_bytes();
-    */
-
-    let message = b"greet()";
-    // send message -> repeat test 10 times
-    for subject in subjects.clone() {
-      client.publish(&subject, message)
-        .await
-        .unwrap();
-    }
-
-    // stop subjects
-    for subject in subjects.iter() {
+      // stop function executor
       client
-        .publish(&subject, b"STOP")
+        .publish(&subject_function_executor, b"STOP")
         .await
         .unwrap();
 
-    }
+      client.disconnect().await;
+    });
 
-    // stop receiving messages
-    client.disconnect().await;
+    // thread for the sender
+    let nats_receiver_handle = task::spawn(async move {
+
+      let client = Client::new(vec![address_receiver_thread]);
+      client.connect().await;
+      const BUFFER_SIZE: usize = 1024;
+      let (_, mut sub) = client.subscribe(&subject_result_receiver, BUFFER_SIZE).await.unwrap();
+
+      loop {
+          let message = sub.recv().await.unwrap();
+          let payload = message.payload();
+
+          match payload {
+            b"STOP" => {
+              info!("Results receiver stops");
+              break;
+            },
+            _ => {
+              info!("Result received: {:?}", payload);
+            }
+          }
+      }
+
+      // when outside the loop -> client stopped, disconnect and close thread
+      client.disconnect().await;
+    });
+
+    // wait for two threads to stop
+    nats_sender_handle.await.unwrap();
+    nats_receiver_handle.await.unwrap();
     Ok(())
-
 }

@@ -5,7 +5,6 @@ globalThis.greet = function() {
 globalThis.loop = function(iterations) {
     console.log("Before loop, iterations: " + iterations);
     for (var i = 0; i < iterations; i++) {
-        console.log("In loop");
     }
     console.log("After loop, iterations: " + iterations);
 }

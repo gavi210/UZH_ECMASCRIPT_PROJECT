@@ -1,4 +1,5 @@
 {
   "nats_server": "localhost:4222",
-  "subjects": ["subject-message-dispatcher"]
+  "subject_function_executor": "subject-message-dispatcher",
+  "subject_result_receiver": "subject-results-receiver"
 }

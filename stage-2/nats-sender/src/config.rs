@@ -4,7 +4,8 @@ use std::fs;
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Configuration {
     pub nats_server: String,
-    pub subjects: Vec<String>,
+    pub subject_function_executor: String,
+    pub subject_result_receiver: String,
 }
 
 // reads in the specified configuration file...

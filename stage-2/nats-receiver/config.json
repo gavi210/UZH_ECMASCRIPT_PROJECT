@@ -11,5 +11,7 @@
       "permit_network_access": true,
       "permitted_hosts": []
     }
-  ]
+  ],
+  "subject_results_receiver": "subject-results-receiver",
+  "subject_function_invoker": "subject-message-dispatcher"
 }
