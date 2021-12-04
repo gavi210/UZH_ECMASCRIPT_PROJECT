@@ -64,4 +64,15 @@ Either two possibilities to dispatch function execution:
 
 
 
+## Add communication mechanism
+sender will keep a table for the results -> dynamic hash function, or map with the id triggered and function results returned
+agree on common message structure: id, function to be invoked
+when responding -> send id and result
+
+## discord how to get the result from the execution
+
+## add a mean to declare new functions or modify them 
+user sends the code: when executing with globalThis, all have to modify the set of functions ->
+add another share object -> list with function definitions
+
 
