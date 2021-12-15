@@ -27,6 +27,6 @@ Module import has been proved to not significantly affect engine performances.
 Outcomes of the experiment shows a 3 orders of magnitude difference between the two execution times. 
 
 ```
-Execution times for deno are: 43.372215 ms
-Execution times for quickJs are: 9667.967495 ms
+Execution time for deno is: 43.372215 ms
+Execution time for quickJs is: 9667.967495 ms
 ```
