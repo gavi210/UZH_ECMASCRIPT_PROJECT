@@ -1,7 +1,7 @@
 use deno_core::error::AnyError;
 use rants::{Client, Subject};
 use tokio::task;
-use log::info;
+use log::warn;
 use tokio::runtime::Runtime;
 use deno_core::serde_v8;
 use deno_core::v8;
@@ -27,10 +27,12 @@ async fn main() -> std::io::Result<()> {
     // thread-safe pointer for the queue
     let messages_queue_arc = Arc::new(Mutex::new(messages_queue));
 
-    let THREADS = 2; // support threads running a main worker -> could be customized: maybe as cmd parameter
+    let threads = 2; // support threads running a main worker -> could be customized: maybe as cmd parameter
 
     // THREAD FOR FUNCTION INVOCATION'S REQUESTS
     let messages_queue_cln_nats_receiver = Arc::clone(&messages_queue_arc);
+
+    warn!("Starting function requests receiver...");
 
     let nats_receiver_handle = task::spawn(async move {
 
@@ -50,11 +52,10 @@ async fn main() -> std::io::Result<()> {
             //info!("Received stopping sequence from nats subject");
             // for each thread add stopping message
             let mut message_queue = messages_queue_cln_nats_receiver.lock().unwrap();
-            for _ in 0..THREADS {
+            for _ in 0..threads {
               message_queue.add(String::from("STOP")).unwrap();
             }
             drop(message_queue);
-            info!("Stops the support threads");
             break;
           },
           _ => {
@@ -71,7 +72,8 @@ async fn main() -> std::io::Result<()> {
    // THREADS FOR FUNCTION EXECUTIONS
     let mut thread_handles = vec![];
 
-    for _ in 0..THREADS {
+    warn!("Starting workers...");
+    for _ in 0..threads {
          // each thread has its own queue reference
          let messages_queue_cln_worker = Arc::clone(&messages_queue_arc);
 
@@ -80,7 +82,7 @@ async fn main() -> std::io::Result<()> {
 
               let configuration = util::config_parser::get_configuration_object();
               let function_definition = &configuration.functions[0].function_definition;
-              let STOPPING_SEQUENCE : String = String::from("STOP");
+              let stopping_sequence : String = String::from("STOP");
 
              // within the thread create a new tokio event loop
              let runtime = Runtime::new().expect("Unable to create the runtime");
@@ -104,23 +106,19 @@ async fn main() -> std::io::Result<()> {
                    else {
                      // execute requested function
                      let message = queue_messages.remove().unwrap();
-                     let queue_size = queue_messages.size();
                      drop(queue_messages);
 
                      // message in the queue to stop the workers
-                     if message.eq(&STOPPING_SEQUENCE) {
-                        if queue_size == 1 { // means the last stopping sequence has been processed -> stop result receiver
-                          client.publish(&subject_results_receiver, b"STOP").await.unwrap();
-                        }
-                       info!("Main Worker stops!");
-                       break;
+                     if message.eq(&stopping_sequence) {
+                        client.publish(&subject_results_receiver, b"STOP").await.unwrap();
+                        break;
                      }
                      else {
                         let context = &mut main_worker.js_runtime;
 
                         // deserialize message into object
                         let c: util::nats_messages::NatsMessage = serde_json::from_str(&message).unwrap();
-
+                        warn!("Execution user function: {:?}", &c.message);
                         let res = context.execute_script("<test>", &c.message);
                         let result = match res {
                            Ok(global) => {
@@ -136,10 +134,10 @@ async fn main() -> std::io::Result<()> {
                                Err(err) => Err(format!("Cannot deserialize value: {:?}", err)),
                              }
                            }
-                           Err(err) => Err(format!("Evaling error: {:?}", err)),
+                           Err(err) => Err(format!("Evaluation error: {:?}", err)),
                          }.unwrap();
 
-                         let mut str_result : String;
+                         let str_result : String;
                          // deserialize the result depending on the type
                           if result.is_string() {
                              str_result = result.as_str().unwrap().to_string();
@@ -167,10 +165,12 @@ async fn main() -> std::io::Result<()> {
     // nats receiver is added to the event_loop associated with the main thread
     nats_receiver_handle.await.unwrap();
 
+
     // handle for another thread
     for handle in thread_handles {
       handle.join().unwrap();
     }
+    warn!("Shutting down the system...");
 
     Ok(())
 }

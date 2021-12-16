@@ -1,12 +1,11 @@
 globalThis.greet = function() {
-    console.log("greetings from the worker");
     return "greets from worker";
 }
 
 globalThis.loop = function(iterations) {
     for (var i = 0; i < iterations; i++) {
     }
-    return 1;
+    return "loop completed";
 }
 
 globalThis.log_this = function(message) {

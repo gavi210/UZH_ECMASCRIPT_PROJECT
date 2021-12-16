@@ -15,6 +15,6 @@ pub fn configure_logger() {
                 record.args()
             )
         })
-        .filter(None, LevelFilter::Info)
+        .filter(None, LevelFilter::Warn)
         .init();
 }

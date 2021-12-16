@@ -1,5 +1,5 @@
 use clap::{App, Arg};
-use log::{info};
+use log::warn;
 use rants::{Client, Subject, Address};
 use serde::{Deserialize, Serialize};
 use tokio::task;
@@ -21,7 +21,7 @@ struct Arguments { // stores arguments passed as input parameters - allows custo
 
 // emulate cmd arguments
 fn parse_args() -> Result<Arguments, clap::Error> {
-    let CONFIG_FILE = "./config.json";
+    let config_file = "./config.json";
     let matches = App::new("Message Sender")
         .version("1.0")
         .author("Maximilian & Riccardo")
@@ -32,7 +32,7 @@ fn parse_args() -> Result<Arguments, clap::Error> {
                 .long("config-file")
                 .about("Name of the configuration file to use")
                 .required(false)
-                .default_value(CONFIG_FILE),
+                .default_value(config_file),
         )
         .get_matches();
 
@@ -59,7 +59,7 @@ fn configure_logger() {
                 record.args()
             )
         })
-        .filter(None, LevelFilter::Info) // discard everything below level INFO
+        .filter(None, LevelFilter::Warn) // discard everything below level INFO
         .init();
 }
 
@@ -91,16 +91,20 @@ async fn main() -> std::io::Result<()> {
       let client = Client::new(vec![address_sender_thread]);
       client.connect().await;
 
+    warn!("Requesting function execution...");
+    let mut counter : usize = 0;
 
+    let message_loop = nats_messages::NatsMessage {
+      id : counter,
+      message : String::from("loop(1000000000)"),
+    };
 
+    counter = counter +1;
+    let str_message_loop = serde_json::to_string(&message_loop).unwrap();
+    client.publish(&subject_function_executor, str_message_loop.as_bytes())
+       .await
+       .unwrap();
 
-      /*
-      let message_loop = b"loop(10);";
-      let message_log = b"log_this(\"Helloooooo\");";
-
-      let message_double = b"double(2);";
-      */
-      let mut counter : usize = 0;
       for _ in 0..5 {
         let message_greet = nats_messages::NatsMessage {
           id : counter,
@@ -142,21 +146,25 @@ async fn main() -> std::io::Result<()> {
       const BUFFER_SIZE: usize = 1024;
       let (_, mut sub) = client.subscribe(&subject_result_receiver, BUFFER_SIZE).await.unwrap();
 
+      let mut stop_counter = 0;
       loop {
           let message = sub.recv().await.unwrap();
           let payload = message.payload();
 
           match payload {
             b"STOP" => {
-              info!("Results receiver stops");
-              break;
+              stop_counter = stop_counter +1;
+              if stop_counter == 2 {
+                warn!("Shutting down the system...");
+                break;
+              }
             },
             _ => {
               let msg = match str::from_utf8(payload) {
                   Ok(v) => v,
                   Err(e) => panic!("Invalid UTF-8 sequence: {}", e),
               };
-              info!("Result received: {:?}", msg);
+              warn!("Result received: {:?}", msg);
             }
           }
       }
